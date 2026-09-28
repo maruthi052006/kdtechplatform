@@ -89,10 +89,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # Database Configuration
-# Fallback to local SQLite if DATABASE_URL is not set
+# Fallback to local SQLite if DATABASE_URL is not set or empty
+raw_db_url = os.environ.get('DATABASE_URL', '').strip()
+default_db_url = raw_db_url if raw_db_url else f'sqlite:///{BASE_DIR / "db.sqlite3"}'
+
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
+        default=default_db_url,
         conn_max_age=600,
         conn_health_checks=True,
     )
