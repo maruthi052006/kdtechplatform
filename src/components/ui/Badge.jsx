@@ -22,9 +22,12 @@ export const Badge = ({
     slate: 'bg-slate-800 text-slate-300 border-slate-700',
   };
 
+  const variantStyle = variants[variant] || variants.cyan;
+  const sizeStyle = sizes[size] || sizes.sm;
+
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-full border ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center font-medium rounded-full border ${variantStyle} ${sizeStyle} ${className}`}
     >
       {children}
     </span>

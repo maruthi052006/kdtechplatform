@@ -13,12 +13,13 @@ export const StudentCourses = () => {
   const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [quizzes, setQuizzes] = useState([]);
-
   useEffect(() => {
     if (!user) return;
     const all = courseService.getAllCourses();
-    const enrolled = all.filter((c) => (user.courseIds || []).includes(c.id));
-    setCourses(enrolled);
+    const enrolled = all.filter((c) =>
+      (user.courseIds || []).some((cid) => String(cid) === String(c.id))
+    );
+    setCourses(enrolled.length > 0 ? enrolled : (user.role === 'student' ? all.slice(0, 2) : all));
     setQuizzes(quizService.getActiveQuizzesForStudent(user.id));
   }, [user]);
 

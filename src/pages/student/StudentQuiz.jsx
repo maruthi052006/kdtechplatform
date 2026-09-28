@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import { quizService } from '../../services/quizService';
 import { courseService } from '../../services/courseService';
 import { questionService } from '../../services/questionService';
@@ -14,36 +15,34 @@ import { Modal } from '../../components/ui/Modal';
 import {
   Terminal,
   Clock,
-  Shield,
   AlertTriangle,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Maximize,
-  HelpCircle,
   Menu,
   X,
-  Lock,
 } from 'lucide-react';
 
 export const StudentQuiz = () => {
   const { quizId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { error, warning, info } = useToast();
+  const { error, warning } = useToast();
 
+  const [attemptId, setAttemptId] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const [course, setCourse] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [answers, setAnswers] = useState({}); // questionId -> selected key
+  const [answers, setAnswers] = useState({}); // questionId / snapshotId -> selected key
 
   // Timing state
   const [remainingSeconds, setRemainingSeconds] = useState(null);
   const targetEndTimeRef = useRef(null);
 
   // Security / Anti-Cheat state
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [, setIsFullscreen] = useState(false);
   const [showFullscreenModal, setShowFullscreenModal] = useState(false);
   const [tabViolations, setTabViolations] = useState(0);
   const [showTabWarningModal, setShowTabWarningModal] = useState(false);
@@ -63,60 +62,123 @@ export const StudentQuiz = () => {
   // 1. Initialize Quiz Data & Attempt Recovery (Prompt Section 42)
   useEffect(() => {
     if (!user) return;
-    const q = quizService.getQuizById(quizId);
-    if (!q) {
-      error('Assessment Not Found', 'This quiz does not exist or has been removed.');
-      navigate('/student/dashboard');
-      return;
-    }
+    let isCancelled = false;
 
-    // Role Guard: Course Assignment Check
-    if (!(user.courseIds || []).includes(q.courseId)) {
-      error('Access Denied', 'You are not assigned to the course associated with this quiz.');
-      navigate('/student/dashboard');
-      return;
-    }
+    async function initializeQuiz() {
+      // 1. Try Authoritative Server Snapshot First
+      try {
+        const serverResp = await api.post(`/attempts/quiz/${quizId}/start/`).catch(() => null);
+        if (serverResp && serverResp.data && !isCancelled) {
+          const att = serverResp.data;
+          setAttemptId(att.attempt_id);
+          setQuiz({
+            id: att.quiz_id,
+            title: att.quiz_title,
+            durationMinutes: Math.max(1, Math.round(att.duration_seconds / 60)),
+            settings: {
+              requireFullscreen: att.security_settings?.require_fullscreen,
+              tabSwitchLimit: att.security_settings?.tab_warning_limit || 3,
+              negativeMarking: att.security_settings?.negative_marking,
+              negativeMarks: att.security_settings?.negative_marks,
+              tabSwitchDetection: true,
+              autoSubmitOnViolations: true,
+            },
+          });
+          setCourse({
+            id: att.course_id,
+            name: att.course_name,
+            code: att.course_name ? att.course_name.substring(0, 4).toUpperCase() : 'EXAM',
+          });
 
-    setQuiz(q);
-    const c = courseService.getCourseById(q.courseId);
-    setCourse(c);
+          const normalizedQuestions = att.questions.map((q, idx) => ({
+            id: q.snapshot_id,
+            snapshot_id: q.snapshot_id,
+            topic: `Question ${idx + 1}`,
+            question: q.question_text,
+            marks: q.marks,
+            options: q.options,
+          }));
 
-    // Fetch and optionally randomize questions (Prompt Section 44)
-    const allQ = questionService.getAllQuestions();
-    let quizQList = allQ.filter((item) => q.questionIds.includes(item.id));
+          setQuestions(normalizedQuestions);
+          setAnswers(att.saved_answers || {});
+          setTabViolations(att.tab_violations || 0);
 
-    // Check saved attempt recovery
-    const savedAttempt = storageService.getQuizAttempt(quizId, user.id);
+          const remSec = att.remaining_seconds != null ? att.remaining_seconds : att.duration_seconds;
+          setRemainingSeconds(remSec);
+          targetEndTimeRef.current = Date.now() + (remSec * 1000);
+          setQuizInitialized(true);
 
-    if (savedAttempt && savedAttempt.questions) {
-      quizQList = savedAttempt.questions;
-      setAnswers(savedAttempt.answers || {});
-      setCurrentIndex(savedAttempt.currentIndex || 0);
-      setTabViolations(savedAttempt.tabViolations || 0);
-      targetEndTimeRef.current = savedAttempt.targetEndTime;
-    } else {
-      if (q.settings?.randomizeQuestions) {
-        quizQList = [...quizQList].sort(() => 0.5 - Math.random());
+          if (att.security_settings?.require_fullscreen && !document.fullscreenElement) {
+            setShowFullscreenModal(true);
+          }
+          return;
+        }
+      } catch (e) {
+        console.warn('Backend quiz start fallback to local cache:', e);
       }
-      if (q.settings?.randomizeOptions) {
-        quizQList = quizQList.map((quest) => ({
-          ...quest,
-          options: [...quest.options].sort(() => 0.5 - Math.random()),
-        }));
+
+      // 2. Fallback to Local Storage
+      const q = quizService.getQuizById(quizId);
+      if (!q) {
+        error('Assessment Not Found', 'This quiz does not exist or has been removed.');
+        navigate('/student/dashboard');
+        return;
       }
 
-      // Calculate initial timestamp end time (Prompt Section 38)
-      const durationMs = q.durationMinutes * 60 * 1000;
-      targetEndTimeRef.current = Date.now() + durationMs;
+      // Role Guard: Course Assignment Check
+      if (!(user.courseIds || []).includes(q.courseId)) {
+        error('Access Denied', 'You are not assigned to the course associated with this quiz.');
+        navigate('/student/dashboard');
+        return;
+      }
+
+      setQuiz(q);
+      const c = courseService.getCourseById(q.courseId);
+      setCourse(c);
+
+      // Fetch and optionally randomize questions (Prompt Section 44)
+      const allQ = questionService.getAllQuestions();
+      let quizQList = allQ.filter((item) => q.questionIds.includes(item.id));
+
+      // Check saved attempt recovery
+      const savedAttempt = storageService.getQuizAttempt(quizId, user.id);
+
+      if (savedAttempt && savedAttempt.questions) {
+        quizQList = savedAttempt.questions;
+        setAnswers(savedAttempt.answers || {});
+        setCurrentIndex(savedAttempt.currentIndex || 0);
+        setTabViolations(savedAttempt.tabViolations || 0);
+        targetEndTimeRef.current = savedAttempt.targetEndTime;
+      } else {
+        if (q.settings?.randomizeQuestions) {
+          quizQList = [...quizQList].sort(() => 0.5 - Math.random());
+        }
+        if (q.settings?.randomizeOptions) {
+          quizQList = quizQList.map((quest) => ({
+            ...quest,
+            options: [...quest.options].sort(() => 0.5 - Math.random()),
+          }));
+        }
+
+        // Calculate initial timestamp end time (Prompt Section 38)
+        const durationMs = q.durationMinutes * 60 * 1000;
+        targetEndTimeRef.current = Date.now() + durationMs;
+      }
+
+      setQuestions(quizQList);
+      setQuizInitialized(true);
+
+      if (q.settings?.requireFullscreen && !document.fullscreenElement) {
+        setShowFullscreenModal(true);
+      }
     }
 
-    setQuestions(quizQList);
-    setQuizInitialized(true);
+    initializeQuiz();
 
-    if (q.settings?.requireFullscreen && !document.fullscreenElement) {
-      setShowFullscreenModal(true);
-    }
-  }, [quizId, user]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [quizId, user, navigate, error]);
 
   // 2. Auto-Save Attempt Cache (Prompt Section 42)
   useEffect(() => {
@@ -129,7 +191,7 @@ export const StudentQuiz = () => {
       tabViolations,
       lastSaved: Date.now(),
     });
-  }, [answers, currentIndex, tabViolations, quizInitialized]);
+  }, [answers, currentIndex, tabViolations, quizInitialized, quizId, user, questions]);
 
   // 3. Submit Evaluation Function (Deterministic value-based scoring)
   const handleFinalSubmit = useCallback(async () => {
@@ -137,21 +199,32 @@ export const StudentQuiz = () => {
     setIsSubmitting(true);
 
     const timeSpent = targetEndTimeRef.current
-      ? Math.max(0, Math.round((Date.now() - (targetEndTimeRef.current - quiz.durationMinutes * 60 * 1000)) / 1000))
+      ? Math.max(0, Math.round((Date.now() - (targetEndTimeRef.current - (quiz?.durationMinutes || 15) * 60 * 1000)) / 1000))
       : 300;
 
     try {
-      const result = resultService.submitQuizAttempt({
-        quizId: quiz.id,
-        studentId: user.id,
-        answers,
-        timeTakenSeconds: timeSpent,
-        securityLog: {
-          tabSwitches: tabViolations,
-          fullscreenExits,
-          copyAttempts,
-        },
-      });
+      let result;
+      if (attemptId) {
+        const answersList = Object.entries(answers)
+          .filter(([_, opt]) => opt !== null && opt !== undefined)
+          .map(([sid, opt]) => ({
+            snapshot_id: parseInt(sid, 10),
+            selected_option: opt,
+          }));
+        result = await resultService.submitQuizAttemptServer(attemptId, answersList);
+      } else {
+        result = resultService.submitQuizAttempt({
+          quizId: quiz.id,
+          studentId: user.id,
+          answers,
+          timeTakenSeconds: timeSpent,
+          securityLog: {
+            tabSwitches: tabViolations,
+            fullscreenExits,
+            copyAttempts,
+          },
+        });
+      }
 
       if (document.fullscreenElement) {
         try {
@@ -166,7 +239,7 @@ export const StudentQuiz = () => {
       error('Submission Error', err.message);
       setIsSubmitting(false);
     }
-  }, [isSubmitting, quiz, user, answers, tabViolations, fullscreenExits, copyAttempts, navigate]);
+  }, [isSubmitting, quiz, user, answers, attemptId, tabViolations, fullscreenExits, copyAttempts, navigate, error]);
 
   // 4. Timestamp-based Countdown Timer (Prompt Section 38)
   useEffect(() => {
@@ -258,6 +331,12 @@ export const StudentQuiz = () => {
         setTabViolations((prev) => {
           const nextCount = prev + 1;
           setShowTabWarningModal(true);
+          if (attemptId) {
+            api.post(`/attempts/${attemptId}/security-event/`, {
+              event_type: 'TAB_SWITCH',
+              details: { reason: 'User left browser tab or minimized window' },
+            }).catch(() => {});
+          }
           const limit = quiz.settings.tabSwitchLimit || 3;
           if (quiz.settings.autoSubmitOnViolations && nextCount >= limit) {
             handleFinalSubmit();
@@ -269,7 +348,7 @@ export const StudentQuiz = () => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [quiz, quizInitialized, handleFinalSubmit]);
+  }, [quiz, quizInitialized, handleFinalSubmit, attemptId]);
 
   // 7. Fullscreen tracking (Prompt Section 40)
   useEffect(() => {
@@ -319,11 +398,22 @@ export const StudentQuiz = () => {
 
   const handleSelectOption = (key) => {
     if (!questions[currentIndex]) return;
-    const currentQId = questions[currentIndex].id;
+    const currentQ = questions[currentIndex];
+    const currentQId = currentQ.id;
+    const newAnswer = answers[currentQId] === key ? null : key;
     setAnswers((prev) => ({
       ...prev,
-      [currentQId]: prev[currentQId] === key ? null : key, // toggle
+      [currentQId]: newAnswer,
     }));
+
+    if (attemptId && currentQ.snapshot_id) {
+      api.post(`/attempts/${attemptId}/save-answer/`, {
+        snapshot_id: currentQ.snapshot_id,
+        selected_option: newAnswer,
+      }).catch((err) => {
+        console.warn('Progressive save warning:', err);
+      });
+    }
   };
 
   if (!quizInitialized || questions.length === 0) {

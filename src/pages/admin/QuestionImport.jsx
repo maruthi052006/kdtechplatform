@@ -78,7 +78,7 @@ export const QuestionImport = () => {
     }
   };
 
-  const handleConfirmImport = () => {
+  const handleConfirmImport = async () => {
     if (!parseResult || parseResult.validQuestions.length === 0) return;
     if (!targetCourseId) {
       error('Selection Required', 'Please choose the target course for imported questions.');
@@ -91,10 +91,10 @@ export const QuestionImport = () => {
         ...q,
         courseId: targetCourseId,
       }));
-      questionService.bulkCreateQuestions(assigned);
+      await questionService.bulkCreateQuestions(assigned, targetCourseId);
       success(
         'Import Complete',
-        `Successfully imported ${assigned.length} questions into ${courses.find((c) => c.id === targetCourseId)?.name}.`
+        `Successfully imported ${assigned.length} questions into ${courses.find((c) => String(c.id) === String(targetCourseId))?.name || 'course'}.`
       );
       navigate('/admin/questions');
     } catch (err) {
