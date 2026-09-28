@@ -124,7 +124,12 @@ databases:
 
 ## 3. Vercel Frontend Configuration
 
-### 3.1 Vercel SPA Routing: `vercel.json`
+### 3.1 Project Settings & SPA Routing (`frontend/vercel.json`)
+* **Framework Preset:** Vite
+* **Root Directory:** `frontend`
+* **Build Command:** `npm run build`
+* **Output Directory:** `dist`
+
 ```json
 {
   "buildCommand": "npm run build",

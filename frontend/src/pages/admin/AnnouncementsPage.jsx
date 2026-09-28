@@ -99,7 +99,7 @@ export const AnnouncementsPage = () => {
                   <div className="space-y-1.5 flex-1">
                     <div className="flex items-center gap-2">
                       <Badge variant={ann.priority === 'high' ? 'rose' : 'cyan'} size="xs">
-                        {ann.priority.toUpperCase()}
+                        {(ann.priority || 'normal').toUpperCase()}
                       </Badge>
                       <Badge variant="slate" size="xs">
                         {course ? course.code : 'All Cohorts'}
