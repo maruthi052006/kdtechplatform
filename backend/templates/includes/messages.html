@@ -1,0 +1,19 @@
+{% if messages %}
+<div id="kd-toast-container" class="kd-toast-container">
+  {% for message in messages %}
+  <div class="kd-toast {{ message.tags }}" role="alert" aria-live="assertive" aria-atomic="true">
+    {% if message.tags == 'success' %}
+      <i class="bi bi-check-circle-fill text-success fs-5"></i>
+    {% elif message.tags == 'warning' %}
+      <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+    {% elif message.tags == 'danger' or message.tags == 'error' %}
+      <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+    {% else %}
+      <i class="bi bi-info-circle-fill text-primary fs-5"></i>
+    {% endif %}
+    <span class="flex-grow-1">{{ message }}</span>
+    <button type="button" class="btn-close btn-close-white ms-2" onclick="this.closest('.kd-toast').remove()" aria-label="Close" style="font-size: 0.7rem;"></button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

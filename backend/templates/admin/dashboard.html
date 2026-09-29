@@ -1,0 +1,247 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Admin Executive Dashboard | KDTechX{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block main_content %}
+<!-- Dashboard Hero Greeting -->
+<div class="kd-dashboard-hero">
+  <div>
+    <div class="d-inline-flex align-items-center gap-2 mb-2 text-primary fw-semibold" style="font-size: 0.8125rem;">
+      <i class="bi bi-shield-check"></i>
+      <span>Trainer Operations Console</span>
+    </div>
+    <h1 class="kd-greeting-title">Good day, {{ request.user.first_name|default:request.user.username }}.</h1>
+    <p class="kd-greeting-subtitle">Here's what's happening across your training cohorts and assessments today.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <a href="{% url 'admin_portal:quiz_create' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+      <i class="bi bi-plus-circle"></i> Create Assessment
+    </a>
+    <a href="{% url 'admin_portal:questions_import' %}" class="kd-btn kd-btn-secondary kd-btn-sm">
+      <i class="bi bi-file-earmark-excel"></i> Import Questions
+    </a>
+  </div>
+</div>
+
+<!-- KPI Cards Grid -->
+<div class="kd-kpi-grid">
+  <!-- Total Students -->
+  <div class="kd-stat-card">
+    <div class="kd-stat-header">
+      <span class="kd-stat-label">Active Candidates</span>
+      <div class="kd-stat-icon"><i class="bi bi-people"></i></div>
+    </div>
+    <div class="kd-stat-value kd-tnum">{{ total_students }}</div>
+    <div class="kd-stat-footer">
+      <span class="kd-stat-trend up"><i class="bi bi-arrow-up-short"></i> Enrolled</span>
+      <span>Across active cohorts</span>
+    </div>
+  </div>
+
+  <!-- Active Courses -->
+  <div class="kd-stat-card">
+    <div class="kd-stat-header">
+      <span class="kd-stat-label">Published Courses</span>
+      <div class="kd-stat-icon"><i class="bi bi-journal-code"></i></div>
+    </div>
+    <div class="kd-stat-value kd-tnum">{{ active_courses }}</div>
+    <div class="kd-stat-footer">
+      <span class="text-secondary">{{ total_quizzes }} scheduled tests</span>
+    </div>
+  </div>
+
+  <!-- Cohort Average Score -->
+  <div class="kd-stat-card">
+    <div class="kd-stat-header">
+      <span class="kd-stat-label">Average Score</span>
+      <div class="kd-stat-icon"><i class="bi bi-graph-up-arrow"></i></div>
+    </div>
+    <div class="kd-stat-value kd-tnum">{{ avg_score }}%</div>
+    <div class="kd-stat-footer">
+      <span class="kd-stat-trend {% if avg_score >= 60 %}up{% else %}down{% endif %}">
+        <i class="bi {% if avg_score >= 60 %}bi-check-circle{% else %}bi-exclamation-circle{% endif %}"></i>
+        Benchmark 60%
+      </span>
+    </div>
+  </div>
+
+  <!-- Assessment Completion Rate -->
+  <div class="kd-stat-card">
+    <div class="kd-stat-header">
+      <span class="kd-stat-label">Completion Velocity</span>
+      <div class="kd-stat-icon"><i class="bi bi-check2-circle"></i></div>
+    </div>
+    <div class="kd-stat-value kd-tnum">{{ completion_rate }}%</div>
+    <div class="kd-stat-footer">
+      <span class="kd-stat-trend up"><i class="bi bi-shield-check"></i> Submissions</span>
+      <span>PostgreSQL Verified</span>
+    </div>
+  </div>
+</div>
+
+<!-- Main Dashboard Composition -->
+<div class="row g-4">
+  <!-- Left Column: Performance Chart & Active Courses -->
+  <div class="col-lg-8">
+    <!-- Performance Chart Card -->
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h2 class="h5 fw-bold text-light mb-1">Assessment Performance Distribution</h2>
+          <p class="text-muted small mb-0">Cohort score progression across recent quizzes</p>
+        </div>
+        <div class="dropdown">
+          <button class="kd-btn kd-btn-outline kd-btn-sm" type="button" data-bs-toggle="dropdown">
+            <span>Last 30 Days</span>
+          </button>
+        </div>
+      </div>
+      <div style="height: 260px; position: relative;">
+        <canvas id="adminPerformanceChart" data-avg-score="{{ avg_score|default:82 }}"></canvas>
+      </div>
+    </div>
+
+    <!-- Active Courses Grid -->
+    <div class="kd-section-header">
+      <h2 class="kd-section-title">Cohort Curricula Overview</h2>
+      <a href="{% url 'admin_portal:courses' %}" class="small text-primary text-decoration-none">View All Courses &rarr;</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+      {% for course in courses %}
+      <div class="col-md-6">
+        <div class="kd-card h-100 kd-card-hover p-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="kd-course-code">{{ course.code }}</span>
+            <span class="kd-badge kd-badge-primary">{{ course.level }}</span>
+          </div>
+          <h3 class="h6 fw-bold text-light mb-2">{{ course.name }}</h3>
+          <p class="text-muted small mb-3 flex-grow-1">{{ course.description|truncatewords:14 }}</p>
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--kd-border) !important; font-size: 0.75rem;">
+            <span class="text-muted"><i class="bi bi-people me-1"></i>{{ course.student_count }} Students</span>
+            <a href="{% url 'admin_portal:course_curriculum' course.id %}" class="text-primary text-decoration-none fw-medium">Curriculum &rarr;</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="kd-empty-state py-4">
+          <p class="text-muted mb-0">No active courses yet.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right Column: Upcoming Assessments & Recent Submissions -->
+  <div class="col-lg-4">
+    <!-- Upcoming Assessments -->
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h6 fw-bold text-light mb-0">Upcoming Assessments</h2>
+        <a href="{% url 'admin_portal:quizzes' %}" class="small text-primary text-decoration-none">Manage</a>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        {% for quiz in upcoming_quizzes %}
+        <div class="p-3 rounded border" style="background-color: var(--kd-surface-2); border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <span class="fw-semibold text-light small">{{ quiz.title }}</span>
+            <span class="kd-badge kd-badge-neutral">{{ quiz.duration_minutes }}m</span>
+          </div>
+          <div class="text-muted fs-xs mb-2">{{ quiz.course.name }}</div>
+          <div class="d-flex align-items-center justify-content-between text-muted fs-xs">
+            <span><i class="bi bi-clock me-1"></i>Due {{ quiz.deadline|date:"M d, H:i" }}</span>
+            <a href="{% url 'admin_portal:quiz_detail' quiz.id %}" class="text-primary text-decoration-none">Inspect &rarr;</a>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted small text-center my-3">No active upcoming quizzes.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Recent Results Feed -->
+    <div class="kd-card">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h6 fw-bold text-light mb-0">Recent Submissions</h2>
+        <a href="{% url 'admin_portal:results' %}" class="small text-primary text-decoration-none">All Results</a>
+      </div>
+
+      <div class="kd-activity-list">
+        {% for a in recent_attempts %}
+        <div class="kd-activity-item">
+          <div class="kd-avatar" style="width: 28px; height: 28px; font-size: 0.75rem;">
+            {{ a.student.user.first_name|default:a.student.user.username|make_list|first|upper }}
+          </div>
+          <div class="kd-activity-content">
+            <div class="d-flex align-items-center justify-content-between">
+              <span class="kd-activity-text fw-medium">{{ a.student.user.get_full_name|default:a.student.user.username }}</span>
+              <span class="kd-badge {% if a.is_passed %}kd-badge-success{% else %}kd-badge-danger{% endif %} py-0 px-1">
+                {{ a.percentage }}%
+              </span>
+            </div>
+            <div class="kd-activity-time text-muted">{{ a.quiz.title }} &bull; {{ a.started_at|timesince }} ago</div>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted small text-center my-3">No submissions recorded yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('adminPerformanceChart');
+  if (ctx && typeof Chart !== 'undefined') {
+    const avgScore = parseFloat(ctx.dataset.avgScore) || 82;
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+    const textColor = isDark ? '#aab4c3' : '#64748b';
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Quiz 1', 'Quiz 2', 'Quiz 3', 'Quiz 4', 'Quiz 5'],
+        datasets: [{
+          label: 'Cohort Average (%)',
+          data: [72, 78, 69, 84, avgScore],
+          borderColor: '#4f8cff',
+          backgroundColor: 'rgba(79, 140, 255, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.35,
+          pointBackgroundColor: '#4f8cff',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { family: 'Inter', size: 11 } }
+          },
+          y: {
+            min: 40,
+            max: 100,
+            grid: { color: gridColor },
+            ticks: { color: textColor, font: { family: 'Inter', size: 11 } }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

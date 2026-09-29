@@ -1,0 +1,180 @@
+/* ==========================================================================
+   KDTechX Navigation (Sidebar Nav, Topbar Controls, Breadcrumbs, Badges)
+   ========================================================================== */
+
+.kd-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kd-space-1);
+}
+
+.kd-nav-header {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--kd-text-muted);
+  padding: var(--kd-space-2) var(--kd-space-3);
+  margin-top: var(--kd-space-2);
+}
+
+.kd-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-3);
+  padding: 8px 12px;
+  border-radius: var(--kd-radius-md);
+  color: var(--kd-text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--kd-transition-fast);
+  position: relative;
+}
+
+.kd-nav-item i {
+  font-size: 1.1rem;
+  color: var(--kd-text-muted);
+  transition: color var(--kd-transition-fast);
+}
+
+.kd-nav-item:hover {
+  background-color: var(--kd-surface-hover);
+  color: var(--kd-text);
+}
+
+.kd-nav-item:hover i {
+  color: var(--kd-primary);
+}
+
+/* Active State */
+.kd-nav-item.active {
+  background-color: var(--kd-primary-tint);
+  color: var(--kd-primary);
+  font-weight: 600;
+}
+
+.kd-nav-item.active i {
+  color: var(--kd-primary);
+}
+
+.kd-nav-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background-color: var(--kd-primary);
+  border-radius: 0 var(--kd-radius-sm) var(--kd-radius-sm) 0;
+}
+
+/* User Profile Badge in Sidebar */
+.kd-user-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-3);
+  text-decoration: none;
+  color: var(--kd-text);
+  padding: var(--kd-space-2);
+  border-radius: var(--kd-radius-md);
+  transition: background-color var(--kd-transition-fast);
+}
+
+.kd-user-badge:hover {
+  background-color: var(--kd-surface-hover);
+}
+
+.kd-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--kd-radius-full);
+  background: linear-gradient(135deg, var(--kd-surface-3) 0%, var(--kd-surface-2) 100%);
+  border: 1px solid var(--kd-border-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--kd-primary);
+  font-weight: 600;
+  font-size: 0.875rem;
+  overflow: hidden;
+}
+
+.kd-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kd-user-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kd-user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--kd-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kd-user-role {
+  font-size: 0.6875rem;
+  color: var(--kd-text-muted);
+}
+
+/* Breadcrumbs */
+.kd-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-2);
+  font-size: 0.8125rem;
+  color: var(--kd-text-muted);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.kd-breadcrumbs li a {
+  color: var(--kd-text-muted);
+  text-decoration: none;
+  transition: color var(--kd-transition-fast);
+}
+
+.kd-breadcrumbs li a:hover {
+  color: var(--kd-text);
+}
+
+.kd-breadcrumbs li.active {
+  color: var(--kd-text);
+  font-weight: 500;
+}
+
+.kd-breadcrumbs-sep {
+  color: var(--kd-text-disabled);
+  font-size: 0.75rem;
+}
+
+/* Theme Switcher Button */
+.kd-theme-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--kd-radius-md);
+  border: 1px solid var(--kd-border);
+  background-color: var(--kd-surface);
+  color: var(--kd-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--kd-transition-fast);
+}
+
+.kd-theme-toggle:hover {
+  background-color: var(--kd-surface-hover);
+  color: var(--kd-text);
+  border-color: var(--kd-border-strong);
+}

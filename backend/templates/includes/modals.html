@@ -1,0 +1,59 @@
+<!-- Global Command Palette Modal (Ctrl+K) -->
+<div class="modal fade" id="kdCommandPaletteModal" tabindex="-1" aria-labelledby="kdCommandPaletteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 560px;">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong); box-shadow: var(--kd-shadow-lg);">
+      <div class="modal-header border-0 pb-0">
+        <div class="kd-search-wrapper w-100">
+          <i class="bi bi-search kd-search-icon"></i>
+          <input type="text" id="kdCommandSearchInput" class="kd-input kd-search-input py-2" placeholder="Type a command or jump to page..." autofocus>
+        </div>
+      </div>
+      <div class="modal-body pt-3 pb-3">
+        <div class="kd-nav-group" id="kdCommandList">
+          <div class="kd-nav-header px-2 text-uppercase fs-xs">Navigation</div>
+          {% if request.user.is_authenticated and request.user.is_admin_user %}
+            <a href="{% url 'admin_portal:dashboard' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-speedometer2"></i> Admin Dashboard</a>
+            <a href="{% url 'admin_portal:courses' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-journal-code"></i> Course Management</a>
+            <a href="{% url 'admin_portal:students' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-people"></i> Student Management</a>
+            <a href="{% url 'admin_portal:batches' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-layers"></i> Batch Cohorts</a>
+            <a href="{% url 'admin_portal:questions' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-database"></i> Question Bank</a>
+            <a href="{% url 'admin_portal:questions_import' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-file-earmark-excel"></i> Excel Question Import</a>
+            <a href="{% url 'admin_portal:quizzes' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-ui-checks-grid"></i> Weekly Assessments</a>
+            <a href="{% url 'admin_portal:results' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-trophy"></i> Results Overview</a>
+            <a href="{% url 'admin_portal:analytics' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-graph-up"></i> Cohort Analytics</a>
+            <a href="{% url 'admin_portal:announcements' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-megaphone"></i> Announcements</a>
+          {% elif request.user.is_authenticated and request.user.is_student_user %}
+            <a href="{% url 'student_portal:dashboard' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-grid-1x2"></i> Student Dashboard</a>
+            <a href="{% url 'student_portal:courses' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-book"></i> My Courses</a>
+            <a href="{% url 'student_portal:history' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-clock-history"></i> Assessment History</a>
+            <a href="{% url 'student_portal:progress' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-bar-chart-steps"></i> My Progress</a>
+            <a href="{% url 'student_portal:profile' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-person-badge"></i> Profile</a>
+          {% else %}
+            <a href="{% url 'public:landing' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-house"></i> Home</a>
+            <a href="{% url 'accounts:student_login' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-box-arrow-in-right"></i> Student Login</a>
+            <a href="{% url 'accounts:admin_login' %}" class="kd-nav-item py-2 px-3"><i class="bi bi-shield-lock"></i> Trainer Login</a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 pb-3 px-3 d-flex justify-content-between text-muted fs-xs">
+        <span><kbd class="bg-dark border border-secondary text-light px-1">ESC</kbd> to close</span>
+        <span>KDTechX Platform</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('kdCommandSearchInput');
+    const list = document.getElementById('kdCommandList');
+    if (input && list) {
+      input.addEventListener('input', function() {
+        const q = this.value.toLowerCase().trim();
+        list.querySelectorAll('a').forEach(link => {
+          link.style.display = link.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+        });
+      });
+    }
+  });
+</script>

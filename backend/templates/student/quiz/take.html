@@ -1,0 +1,170 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Assessment: {{ quiz.title }} | KDTechX{% endblock %}
+
+{% block app_shell %}
+<div class="kd-exam-container">
+  <!-- Exam Sticky Header -->
+  <header class="kd-quiz-bar">
+    <div class="d-flex align-items-center gap-3">
+      <div class="kd-brand-logo" style="width: 28px; height: 28px; font-size: 0.8rem;">K</div>
+      <div>
+        <div class="kd-quiz-title">{{ quiz.title }}</div>
+        <div class="text-muted fs-xs">{{ quiz.course.name }} ({{ quiz.course.code }})</div>
+      </div>
+    </div>
+
+    <!-- Center: Server-Authoritative Countdown Timer -->
+    <div class="d-flex align-items-center gap-3">
+      <div id="quiz-timer" class="kd-timer">
+        <i class="bi bi-clock"></i>
+        <span id="timer-display">--:--</span>
+      </div>
+
+      {% if quiz.require_fullscreen %}
+      <button type="button" id="btn-request-fullscreen" class="kd-btn kd-btn-outline kd-btn-sm d-none d-sm-inline-flex" title="Toggle Fullscreen">
+        <i class="bi bi-fullscreen"></i>
+      </button>
+      {% endif %}
+    </div>
+
+    <!-- Right: Finish / Submit Trigger -->
+    <div>
+      <button type="button" id="quiz-finish-btn" class="kd-btn kd-btn-primary kd-btn-sm">
+        <i class="bi bi-check2-circle"></i> Finish Assessment
+      </button>
+    </div>
+  </header>
+
+  <!-- Exam Body -->
+  <main class="kd-exam-body">
+    <!-- Question Navigator Pills -->
+    <div class="kd-question-navigator">
+      {% for q in candidate_questions %}
+      <button type="button" class="kd-nav-pill" data-question-index="{{ forloop.counter0 }}">
+        {{ forloop.counter }}
+      </button>
+      {% endfor %}
+    </div>
+
+    <!-- Active Assessment Form -->
+    <form id="quiz-submission-form" method="post" action="{% url 'student_portal:quiz_submit' attempt.id %}">
+      {% csrf_token %}
+
+      {% for q in candidate_questions %}
+      <div class="kd-question-card {% if not forloop.first %}d-none{% endif %}">
+        <div class="kd-question-header">
+          <span class="kd-question-index">Question {{ forloop.counter }} of {{ total_questions }}</span>
+          <span class="kd-badge kd-badge-neutral">{{ q.marks }} Marks</span>
+        </div>
+
+        <div class="kd-question-text">
+          {{ q.question_text }}
+        </div>
+
+        <div class="kd-options-list">
+          {% for opt in q.options %}
+          <label class="kd-option-label">
+            <input type="radio" name="question_{{ q.snap_id }}" value="{{ opt.key }}" class="kd-option-input">
+            <div class="kd-option-badge">{{ opt.key }}</div>
+            <div class="kd-option-text">{{ opt.text }}</div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </form>
+
+    <!-- Bottom Navigation Bar -->
+    <div class="d-flex align-items-center justify-content-between mt-4">
+      <button type="button" id="quiz-prev-btn" class="kd-btn kd-btn-outline kd-btn-sm" disabled>
+        <i class="bi bi-chevron-left"></i> Previous Question
+      </button>
+      <button type="button" id="quiz-next-btn" class="kd-btn kd-btn-primary kd-btn-sm">
+        Next Question <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- Submit Confirmation Modal -->
+<div class="modal fade" id="quizConfirmSubmitModal" tabindex="-1" aria-labelledby="quizConfirmSubmitLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6" id="quizConfirmSubmitLabel">Submit Assessment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4 text-center">
+        <div class="kd-empty-icon mx-auto text-primary mb-3">
+          <i class="bi bi-send-check"></i>
+        </div>
+        <h4 class="h6 fw-bold text-light mb-2">Ready to Submit?</h4>
+        <p class="text-muted small mb-4">Once submitted, your answers will be evaluated on the server and cannot be edited.</p>
+
+        <div class="d-flex justify-content-center gap-4 p-3 rounded bg-surface-2 border mb-3" style="border-color: var(--kd-border) !important;">
+          <div>
+            <div class="text-success fw-bold fs-4 kd-tnum" id="modal-answered-count">0</div>
+            <div class="text-muted fs-xs">Answered</div>
+          </div>
+          <div class="border-end" style="border-color: var(--kd-border) !important;"></div>
+          <div>
+            <div class="text-warning fw-bold fs-4 kd-tnum" id="modal-unanswered-count">0</div>
+            <div class="text-muted fs-xs">Unanswered</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+        <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Resume Test</button>
+        <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" onclick="window.KDTechXQuiz.submitQuiz(false)">
+          Confirm & Finalize
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/quiz-engine.js' %}"></script>
+<script src="{% static 'js/quiz-security.js' %}"></script>
+<script id="exam-config" type="application/json">
+{
+  "quizId": {{ quiz.id }},
+  "attemptId": {{ attempt.id }},
+  "remainingSeconds": {{ remaining_seconds }},
+  "totalQuestions": {{ total_questions }},
+  "submitUrl": "{% url 'student_portal:quiz_submit' attempt.id %}",
+  "telemetryUrl": "{% url 'student_portal:quiz_security_event' attempt.id %}",
+  "requireFullscreen": {% if quiz.require_fullscreen %}true{% else %}false{% endif %},
+  "preventCopy": {% if quiz.prevent_copy %}true{% else %}false{% endif %},
+  "warningLimit": {{ quiz.tab_warning_limit|default:3 }}
+}
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const configEl = document.getElementById('exam-config');
+  if (!configEl) return;
+  const config = JSON.parse(configEl.textContent);
+
+  // Initialize Exam Engine
+  window.KDTechXQuiz.init({
+    quizId: config.quizId,
+    attemptId: config.attemptId,
+    remainingSeconds: config.remainingSeconds,
+    totalQuestions: config.totalQuestions,
+    submitUrl: config.submitUrl
+  });
+
+  // Initialize Anti-Cheat Telemetry
+  window.KDTechXSecurity.init({
+    attemptId: config.attemptId,
+    telemetryUrl: config.telemetryUrl,
+    requireFullscreen: config.requireFullscreen,
+    preventCopy: config.preventCopy,
+    warningLimit: config.warningLimit
+  });
+});
+</script>
+{% endblock %}

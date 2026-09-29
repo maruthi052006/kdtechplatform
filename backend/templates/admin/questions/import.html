@@ -1,0 +1,112 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Excel Question Import | KDTechX{% endblock %}
+{% block page_title %}Excel Question Import{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <!-- Header -->
+    <div class="mb-4">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{% url 'admin_portal:questions' %}" class="text-muted text-decoration-none small">&larr; Back to Question Bank</a>
+      </div>
+      <h1 class="h4 fw-bold text-light mb-1">Bulk Question Spreadsheet Ingestion</h1>
+      <p class="text-muted small mb-0">Upload an Excel (.xlsx) or CSV file to import multiple multiple-choice questions into a course bank.</p>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="kd-card mb-4">
+      <form method="post" enctype="multipart/form-data" action="{% url 'admin_portal:questions_import' %}">
+        {% csrf_token %}
+        <div class="kd-form-group mb-4">
+          <label for="import_course" class="kd-label kd-label-required">Destination Course</label>
+          <select id="import_course" name="course_id" class="kd-select" required>
+            <option value="">-- Choose target course --</option>
+            {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="kd-form-group mb-4">
+          <label class="kd-label kd-label-required">Spreadsheet File (.xlsx or .csv)</label>
+          <div class="kd-dropzone" onclick="document.getElementById('excel_file').click()">
+            <i class="bi bi-file-earmark-excel kd-dropzone-icon d-block"></i>
+            <span class="fw-semibold text-light d-block mb-1">Click to select file, or drag and drop</span>
+            <span class="text-muted fs-xs">Supports Excel .xlsx and comma-separated .csv up to 5MB</span>
+            <input type="file" id="excel_file" name="file" accept=".xlsx,.csv" class="d-none" onchange="displaySelectedFile(this)" required>
+          </div>
+          <div id="file-name-display" class="mt-2 text-primary fw-medium small d-none"></div>
+        </div>
+
+        <!-- Formatting Standard Reference -->
+        <div class="p-3 rounded bg-surface-2 border mb-4" style="border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="fw-semibold text-light small"><i class="bi bi-info-circle me-1"></i>Required Column Headers</span>
+          </div>
+          <div class="d-flex flex-wrap gap-1 mb-2">
+            <code class="kd-badge kd-badge-neutral font-monospace">question</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">option_a</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">option_b</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">option_c</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">option_d</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">answer (A, B, C, or D)</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">difficulty (easy, medium, hard)</code>
+            <code class="kd-badge kd-badge-neutral font-monospace">marks</code>
+          </div>
+          <span class="text-muted fs-xs">Headers are case-insensitive. Row validation checks required choices, valid answer keys, and duplicate questions.</span>
+        </div>
+
+        <div class="d-flex justify-content-end">
+          <button type="submit" class="kd-btn kd-btn-primary">
+            <i class="bi bi-cloud-arrow-up"></i> Validate & Import Questions
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Validation Errors Display (if any) -->
+    {% if validation_errors %}
+    <div class="kd-card border-danger">
+      <div class="d-flex align-items-center gap-2 text-danger mb-3">
+        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+        <h3 class="h6 fw-bold mb-0">Row-Level Ingestion Errors</h3>
+      </div>
+      <p class="text-muted small mb-3">The following rows did not pass validation and were skipped:</p>
+      <div class="kd-table-responsive" style="max-height: 280px; overflow-y: auto;">
+        <table class="kd-table table-sm">
+          <thead>
+            <tr>
+              <th>Row #</th>
+              <th>Field</th>
+              <th>Issue Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for err in validation_errors %}
+            <tr>
+              <td><span class="kd-badge kd-badge-danger">Row {{ err.row }}</span></td>
+              <td class="font-monospace text-secondary small">{{ err.column|default:"Global" }}</td>
+              <td class="text-muted small">{{ err.message }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+function displaySelectedFile(input) {
+  const display = document.getElementById('file-name-display');
+  if (input.files && input.files[0]) {
+    display.innerHTML = `<i class="bi bi-check-circle me-1"></i> Selected: <strong>${input.files[0].name}</strong> (${(input.files[0].size / 1024).toFixed(1)} KB)`;
+    display.classList.remove('d-none');
+  }
+}
+</script>
+{% endblock %}

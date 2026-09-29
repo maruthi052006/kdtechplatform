@@ -1,0 +1,132 @@
+/* ==========================================================================
+   KDTechX Form Controls & Inputs
+   ========================================================================== */
+
+.kd-form-group {
+  margin-bottom: var(--kd-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kd-space-2);
+}
+
+.kd-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--kd-text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kd-label-required::after {
+  content: '*';
+  color: var(--kd-danger);
+  margin-left: 4px;
+}
+
+.kd-input, .kd-select, .kd-textarea {
+  width: 100%;
+  font-family: var(--kd-font-sans);
+  font-size: 0.875rem;
+  color: var(--kd-text);
+  background-color: var(--kd-surface-2);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-md);
+  padding: 9px 12px;
+  outline: none;
+  transition: all var(--kd-transition-fast);
+}
+
+.kd-input:focus, .kd-select:focus, .kd-textarea:focus {
+  border-color: var(--kd-primary);
+  box-shadow: 0 0 0 3px var(--kd-primary-glow);
+  background-color: var(--kd-surface);
+}
+
+.kd-input::placeholder, .kd-textarea::placeholder {
+  color: var(--kd-text-muted);
+}
+
+.kd-input:disabled, .kd-select:disabled, .kd-textarea:disabled {
+  opacity: 0.6;
+  background-color: var(--kd-surface-3);
+  cursor: not-allowed;
+}
+
+.kd-textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+/* Search input with icon */
+.kd-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.kd-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--kd-text-muted);
+  pointer-events: none;
+  font-size: 0.95rem;
+}
+
+.kd-search-input {
+  padding-left: 36px !important;
+}
+
+/* Helper & Error text */
+.kd-helper-text {
+  font-size: 0.75rem;
+  color: var(--kd-text-muted);
+  margin-top: 2px;
+}
+
+.kd-error-text {
+  font-size: 0.75rem;
+  color: var(--kd-danger);
+  margin-top: 2px;
+}
+
+/* File Upload Dropzone */
+.kd-dropzone {
+  border: 2px dashed var(--kd-border-strong);
+  border-radius: var(--kd-radius-lg);
+  padding: var(--kd-space-8) var(--kd-space-4);
+  text-align: center;
+  background-color: var(--kd-surface-2);
+  cursor: pointer;
+  transition: all var(--kd-transition-fast);
+}
+
+.kd-dropzone:hover, .kd-dropzone.dragover {
+  border-color: var(--kd-primary);
+  background-color: var(--kd-primary-tint);
+}
+
+.kd-dropzone-icon {
+  font-size: 2.25rem;
+  color: var(--kd-primary);
+  margin-bottom: var(--kd-space-3);
+}
+
+/* Custom Checkbox & Radio */
+.kd-checkbox, .kd-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kd-space-2);
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.875rem;
+  color: var(--kd-text);
+}
+
+.kd-checkbox input, .kd-radio input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--kd-primary);
+  cursor: pointer;
+}

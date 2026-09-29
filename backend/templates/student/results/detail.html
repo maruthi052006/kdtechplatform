@@ -1,0 +1,139 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}Result: {{ quiz.title }} | KDTechX{% endblock %}
+{% block page_title %}Assessment Result{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <!-- Back Navigation -->
+    <div class="mb-4">
+      <a href="{% url 'student_portal:history' %}" class="text-muted text-decoration-none small">&larr; Back to Assessment History</a>
+    </div>
+
+    <!-- Result Hero Card -->
+    <div class="kd-result-hero">
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-3 border" style="background-color: var(--kd-surface-2); border-color: var(--kd-border-strong) !important; font-size: 0.8125rem;">
+        <span class="kd-course-code">{{ quiz.course.code }}</span>
+        <span class="text-secondary fw-medium">{{ quiz.title }}</span>
+      </div>
+
+      <div class="kd-result-score-circle {% if attempt.is_passed %}passed{% else %}failed{% endif %}">
+        <div class="kd-result-score-num kd-tnum">{{ attempt.score|floatformat:0 }}</div>
+        <div class="kd-result-score-total">/ {{ quiz.total_marks|floatformat:0 }}</div>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+        <span class="fs-4 fw-bold text-light kd-tnum">{{ attempt.percentage }}%</span>
+        <span class="kd-badge {% if attempt.is_passed %}kd-badge-success{% else %}kd-badge-danger{% endif %} fs-6 py-1 px-3">
+          {% if attempt.is_passed %}PASSED{% else %}NEEDS REVIEW{% endif %}
+        </span>
+      </div>
+      <p class="text-muted small mb-0">Passing Threshold: {{ quiz.pass_percentage }}%</p>
+    </div>
+
+    <!-- Breakdown KPI Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="kd-stat-card p-3 text-center">
+          <span class="kd-stat-label">Correct</span>
+          <div class="kd-stat-value text-success fs-4 kd-tnum">{{ attempt.correct_count }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kd-stat-card p-3 text-center">
+          <span class="kd-stat-label">Incorrect</span>
+          <div class="kd-stat-value text-danger fs-4 kd-tnum">{{ attempt.wrong_count }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kd-stat-card p-3 text-center">
+          <span class="kd-stat-label">Unanswered</span>
+          <div class="kd-stat-value text-warning fs-4 kd-tnum">{{ attempt.unanswered_count }}</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="kd-stat-card p-3 text-center">
+          <span class="kd-stat-label">Time Taken</span>
+          <div class="kd-stat-value text-secondary fs-4 kd-tnum">{{ attempt.time_taken_seconds }}s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question-by-Question Review -->
+    {% if quiz.show_answers %}
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom" style="border-color: var(--kd-border) !important;">
+        <div>
+          <h2 class="h5 fw-bold text-light mb-1">Answer Review & Explanations</h2>
+          <p class="text-muted small mb-0">Detailed breakdown of candidate selections vs. expected answers</p>
+        </div>
+        <span class="kd-badge kd-badge-neutral">{{ reviews|length }} Questions</span>
+      </div>
+
+      <div class="d-flex flex-column gap-4">
+        {% for r in reviews %}
+        <div class="p-4 rounded border" style="background-color: var(--kd-surface-2); border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <span class="fw-bold text-muted small">Question {{ r.display_order }}</span>
+            <div>
+              {% if r.is_correct %}
+                <span class="kd-badge kd-badge-success"><i class="bi bi-check-lg me-1"></i>+{{ r.marks_awarded }}</span>
+              {% elif r.selected_option %}
+                <span class="kd-badge kd-badge-danger"><i class="bi bi-x-lg me-1"></i>{{ r.marks_awarded }}</span>
+              {% else %}
+                <span class="kd-badge kd-badge-warning"><i class="bi bi-dash me-1"></i>Unanswered</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <h3 class="h6 fw-semibold text-light mb-3">{{ r.question.question_text }}</h3>
+
+          <div class="d-flex flex-column gap-2 mb-3">
+            <div class="p-2 px-3 rounded small {% if r.candidate_correct_key == 'A' %}bg-success-subtle text-success border border-success{% elif r.selected_option == 'A' %}bg-danger-subtle text-danger border border-danger{% else %}bg-surface-3 text-secondary{% endif %}">
+              <strong>A.</strong> {{ r.question.option_a }}
+              {% if r.selected_option == 'A' %}<span class="badge bg-secondary ms-2">Your Answer</span>{% endif %}
+              {% if r.candidate_correct_key == 'A' %}<span class="badge bg-success ms-2">Correct</span>{% endif %}
+            </div>
+            <div class="p-2 px-3 rounded small {% if r.candidate_correct_key == 'B' %}bg-success-subtle text-success border border-success{% elif r.selected_option == 'B' %}bg-danger-subtle text-danger border border-danger{% else %}bg-surface-3 text-secondary{% endif %}">
+              <strong>B.</strong> {{ r.question.option_b }}
+              {% if r.selected_option == 'B' %}<span class="badge bg-secondary ms-2">Your Answer</span>{% endif %}
+              {% if r.candidate_correct_key == 'B' %}<span class="badge bg-success ms-2">Correct</span>{% endif %}
+            </div>
+            <div class="p-2 px-3 rounded small {% if r.candidate_correct_key == 'C' %}bg-success-subtle text-success border border-success{% elif r.selected_option == 'C' %}bg-danger-subtle text-danger border border-danger{% else %}bg-surface-3 text-secondary{% endif %}">
+              <strong>C.</strong> {{ r.question.option_c }}
+              {% if r.selected_option == 'C' %}<span class="badge bg-secondary ms-2">Your Answer</span>{% endif %}
+              {% if r.candidate_correct_key == 'C' %}<span class="badge bg-success ms-2">Correct</span>{% endif %}
+            </div>
+            <div class="p-2 px-3 rounded small {% if r.candidate_correct_key == 'D' %}bg-success-subtle text-success border border-success{% elif r.selected_option == 'D' %}bg-danger-subtle text-danger border border-danger{% else %}bg-surface-3 text-secondary{% endif %}">
+              <strong>D.</strong> {{ r.question.option_d }}
+              {% if r.selected_option == 'D' %}<span class="badge bg-secondary ms-2">Your Answer</span>{% endif %}
+              {% if r.candidate_correct_key == 'D' %}<span class="badge bg-success ms-2">Correct</span>{% endif %}
+            </div>
+          </div>
+
+          {% if r.explanation %}
+          <div class="p-3 rounded bg-surface border" style="border-color: var(--kd-border) !important;">
+            <span class="text-primary fw-semibold fs-xs d-block mb-1"><i class="bi bi-lightbulb me-1"></i>Explanation:</span>
+            <p class="text-muted small mb-0">{{ r.explanation }}</p>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="{% url 'student_portal:dashboard' %}" class="kd-btn kd-btn-outline kd-btn-sm">
+        Return to Dashboard
+      </a>
+      <a href="{% url 'student_portal:history' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+        View All History
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

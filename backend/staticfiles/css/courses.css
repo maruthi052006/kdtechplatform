@@ -1,0 +1,154 @@
+/* ==========================================================================
+   KDTechX Courses & Curriculum Styles
+   ========================================================================== */
+
+.kd-course-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--kd-space-5);
+  margin-bottom: var(--kd-space-6);
+}
+
+.kd-course-card {
+  background-color: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--kd-shadow-card);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--kd-transition-fast);
+}
+
+.kd-course-card:hover {
+  border-color: var(--kd-border-strong);
+  transform: translateY(-2px);
+}
+
+.kd-course-body {
+  padding: var(--kd-space-5);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.kd-course-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--kd-space-3);
+}
+
+.kd-course-code {
+  font-family: var(--kd-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--kd-primary);
+  background-color: var(--kd-primary-tint);
+  padding: 2px 6px;
+  border-radius: var(--kd-radius-sm);
+}
+
+.kd-course-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--kd-text);
+  margin-bottom: var(--kd-space-2);
+}
+
+.kd-course-desc {
+  font-size: 0.875rem;
+  color: var(--kd-text-secondary);
+  line-height: 1.5;
+  margin-bottom: var(--kd-space-4);
+  flex: 1;
+}
+
+.kd-course-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-4);
+  font-size: 0.8125rem;
+  color: var(--kd-text-muted);
+  padding-top: var(--kd-space-3);
+  border-top: 1px solid var(--kd-border);
+}
+
+/* Curriculum Timeline */
+.kd-curriculum-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kd-space-5);
+  position: relative;
+  padding-left: var(--kd-space-6);
+}
+
+.kd-curriculum-timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  background-color: var(--kd-border-strong);
+}
+
+.kd-week-block {
+  position: relative;
+  background-color: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-lg);
+  padding: var(--kd-space-5);
+  box-shadow: var(--kd-shadow-card);
+}
+
+.kd-week-marker {
+  position: absolute;
+  left: -28px;
+  top: 18px;
+  width: 16px;
+  height: 16px;
+  border-radius: var(--kd-radius-full);
+  background-color: var(--kd-surface);
+  border: 3px solid var(--kd-primary);
+}
+
+.kd-week-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--kd-space-3);
+}
+
+.kd-week-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--kd-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kd-topic-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--kd-space-2);
+  margin-top: var(--kd-space-3);
+}
+
+.kd-topic-item {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-3);
+  padding: 8px 12px;
+  background-color: var(--kd-surface-2);
+  border-radius: var(--kd-radius-md);
+  font-size: 0.875rem;
+  color: var(--kd-text);
+}
+
+.kd-topic-num {
+  font-family: var(--kd-font-mono);
+  font-size: 0.75rem;
+  color: var(--kd-text-muted);
+  font-weight: 600;
+}

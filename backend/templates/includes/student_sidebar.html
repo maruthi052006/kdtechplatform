@@ -1,0 +1,83 @@
+{% load static %}
+<aside class="kd-sidebar">
+  <!-- Brand Header -->
+  <div class="kd-sidebar-header">
+    <a href="{% url 'student_portal:dashboard' %}" class="kd-sidebar-brand">
+      <div class="kd-brand-logo">K</div>
+      <div class="kd-brand-text">
+        <span class="kd-brand-name">KDTechX</span>
+        <span class="kd-brand-tagline">Student Portal</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Navigation Groups -->
+  <div class="kd-sidebar-content">
+    <!-- OVERVIEW -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Overview</div>
+      <a href="{% url 'student_portal:dashboard' %}" class="kd-nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-grid-1x2"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <!-- LEARNING -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Learning</div>
+      <a href="{% url 'student_portal:courses' %}" class="kd-nav-item {% if active_nav == 'courses' %}active{% endif %}">
+        <i class="bi bi-book"></i>
+        <span>My Courses</span>
+      </a>
+      <a href="{% url 'student_portal:progress' %}" class="kd-nav-item {% if active_nav == 'progress' %}active{% endif %}">
+        <i class="bi bi-bar-chart-steps"></i>
+        <span>My Progress</span>
+      </a>
+    </div>
+
+    <!-- ASSESSMENT -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Assessment</div>
+      <a href="{% url 'student_portal:history' %}" class="kd-nav-item {% if active_nav == 'history' %}active{% endif %}">
+        <i class="bi bi-clock-history"></i>
+        <span>Quiz History</span>
+      </a>
+    </div>
+
+    <!-- ACCOUNT -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Account</div>
+      <a href="{% url 'student_portal:profile' %}" class="kd-nav-item {% if active_nav == 'profile' %}active{% endif %}">
+        <i class="bi bi-person-badge"></i>
+        <span>My Profile</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- User Profile & Session Footer -->
+  <div class="kd-sidebar-footer">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2 overflow-hidden">
+        <div class="kd-avatar">
+          {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+        </div>
+        <div class="kd-user-info">
+          <span class="kd-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+          <span class="kd-user-role">
+            {% if request.user.student_profile %}
+              {{ request.user.student_profile.student_id }}
+            {% else %}
+              Candidate
+            {% endif %}
+          </span>
+        </div>
+      </div>
+      <form method="post" action="{% url 'accounts:logout' %}" class="m-0 p-0">
+        {% csrf_token %}
+        <button type="submit" class="kd-btn kd-btn-outline kd-btn-sm p-1 px-2 text-danger" title="Sign out">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</aside>

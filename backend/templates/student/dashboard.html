@@ -1,0 +1,188 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard | KDTechX{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block main_content %}
+<!-- Student Hero Section -->
+<div class="kd-dashboard-hero">
+  <div>
+    <div class="d-inline-flex align-items-center gap-2 mb-2 text-primary fw-semibold" style="font-size: 0.8125rem;">
+      <i class="bi bi-mortarboard"></i>
+      <span>Candidate Workspace &bull; {{ request.user.student_profile.student_id }}</span>
+    </div>
+    <h1 class="kd-greeting-title">Welcome back, {{ request.user.first_name|default:request.user.username }}.</h1>
+    <p class="kd-greeting-subtitle">Continue where you left off in your technical curriculum and assessments.</p>
+  </div>
+  <div>
+    <span class="kd-badge kd-badge-primary py-2 px-3">
+      Batch: {{ request.user.student_profile.batch.name|default:"Individual" }}
+    </span>
+  </div>
+</div>
+
+<!-- Student Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Enrolled Courses</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ enrollments.count }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Completed Tests</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ total_completed }}</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Average Score</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ avg_score }}%</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Active Tests Open</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ active_quizzes|length }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Main Workspace Layout -->
+<div class="row g-4">
+  <!-- Left Column: Active Quizzes & Enrolled Courses -->
+  <div class="col-lg-8">
+    <!-- Active Quizzes Callout (Highest Priority) -->
+    <div class="kd-card mb-4 border-primary" style="box-shadow: 0 0 20px rgba(79, 140, 255, 0.08);">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div class="d-flex align-items-center gap-2">
+          <span class="kd-status-dot active"></span>
+          <h2 class="h5 fw-bold text-light mb-0">Scheduled Assessments Ready to Take</h2>
+        </div>
+        <span class="kd-badge kd-badge-primary">Live</span>
+      </div>
+
+      {% if active_quizzes %}
+        <div class="d-flex flex-column gap-3">
+          {% for item in active_quizzes %}
+          <div class="p-3 rounded border d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3" style="background-color: var(--kd-surface-2); border-color: var(--kd-border) !important;">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="kd-course-code">{{ item.quiz.course.code }}</span>
+                <span class="fw-bold text-light">{{ item.quiz.title }}</span>
+              </div>
+              <div class="text-muted small">
+                <span><i class="bi bi-clock me-1"></i>{{ item.quiz.duration_minutes }} Mins</span>
+                <span class="mx-2">&bull;</span>
+                <span>Due {{ item.quiz.deadline|date:"M d, H:i" }}</span>
+              </div>
+            </div>
+            <div>
+              {% if item.can_attempt %}
+                <a href="{% url 'student_portal:quiz_take' item.quiz.id %}" class="kd-btn kd-btn-primary kd-btn-sm w-100 w-sm-auto">
+                  {% if item.in_progress %}
+                    <i class="bi bi-play-circle"></i> Resume Test
+                  {% else %}
+                    <i class="bi bi-pencil-square"></i> Start Assessment
+                  {% endif %}
+                </a>
+              {% else %}
+                <span class="kd-badge kd-badge-neutral py-2 px-3">Completed</span>
+              {% endif %}
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-center py-4 text-muted">
+          <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+          <p class="mb-0 small">You are all caught up! No pending assessments currently scheduled.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Enrolled Courses -->
+    <div class="kd-section-header">
+      <h2 class="kd-section-title">My Courses</h2>
+      <a href="{% url 'student_portal:courses' %}" class="small text-primary text-decoration-none">View All &rarr;</a>
+    </div>
+
+    <div class="row g-3">
+      {% for en in enrollments %}
+      <div class="col-md-6">
+        <div class="kd-card h-100 kd-card-hover p-4">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="kd-course-code">{{ en.course.code }}</span>
+            <span class="kd-badge kd-badge-neutral">{{ en.course.level }}</span>
+          </div>
+          <h3 class="h6 fw-bold text-light mb-2">{{ en.course.name }}</h3>
+          <p class="text-muted small mb-3 flex-grow-1">{{ en.course.description|truncatewords:14 }}</p>
+          <div class="d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: var(--kd-border) !important; font-size: 0.75rem;">
+            <span class="text-muted"><i class="bi bi-clock me-1"></i>{{ en.course.duration_weeks }} Weeks</span>
+            <a href="{% url 'student_portal:course_detail' en.course.id %}" class="text-primary text-decoration-none fw-medium">View Curriculum &rarr;</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="kd-empty-state py-4">
+          <p class="text-muted mb-0">You are not enrolled in any courses yet. Contact your instructor.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Right Column: Recent Results & Announcements -->
+  <div class="col-lg-4">
+    <!-- Recent Results -->
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="h6 fw-bold text-light mb-0">Recent Results</h2>
+        <a href="{% url 'student_portal:history' %}" class="small text-primary text-decoration-none">History</a>
+      </div>
+
+      <div class="d-flex flex-column gap-3">
+        {% for a in recent_attempts %}
+        <a href="{% url 'student_portal:result_detail' a.id %}" class="p-3 rounded border text-decoration-none kd-card-hover d-block" style="background-color: var(--kd-surface-2); border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <span class="fw-semibold text-light small text-truncate" style="max-width: 180px;">{{ a.quiz.title }}</span>
+            <span class="kd-badge {% if a.is_passed %}kd-badge-success{% else %}kd-badge-danger{% endif %}">
+              {{ a.percentage }}%
+            </span>
+          </div>
+          <div class="d-flex align-items-center justify-content-between text-muted fs-xs">
+            <span>{{ a.quiz.course.code }}</span>
+            <span>{{ a.submitted_at|date:"M d" }}</span>
+          </div>
+        </a>
+        {% empty %}
+        <p class="text-muted small text-center my-3">No submitted quiz results yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    {% if announcements %}
+    <div class="kd-card">
+      <h2 class="h6 fw-bold text-light mb-3">Cohort Broadcasts</h2>
+      <div class="d-flex flex-column gap-3">
+        {% for ann in announcements %}
+        <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center justify-content-between mb-1">
+            <span class="fw-semibold text-light small">{{ ann.title }}</span>
+            <span class="kd-badge {% if ann.priority == 'urgent' or ann.priority == 'high' %}kd-badge-danger{% else %}kd-badge-primary{% endif %} py-0 px-1">
+              {{ ann.priority }}
+            </span>
+          </div>
+          <p class="text-muted fs-xs mb-0">{{ ann.content|truncatewords:20 }}</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

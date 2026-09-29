@@ -1,0 +1,61 @@
+{% load static %}
+<header class="kd-topbar">
+  <!-- Left Side: Mobile Menu Button & Breadcrumbs -->
+  <div class="kd-topbar-left">
+    <button class="kd-btn kd-btn-outline kd-btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#kdMobileSidebar" aria-controls="kdMobileSidebar">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+
+    <div class="d-none d-sm-flex align-items-center">
+      {% block breadcrumbs %}
+      <nav aria-label="breadcrumb">
+        <ol class="kd-breadcrumbs">
+          <li><a href="{% if request.user.is_admin_user %}{% url 'admin_portal:dashboard' %}{% else %}{% url 'student_portal:dashboard' %}{% endif %}">Portal</a></li>
+          <li class="kd-breadcrumbs-sep">/</li>
+          <li class="active" aria-current="page">{% block page_title %}{{ page_title|default:"Overview" }}{% endblock %}</li>
+        </ol>
+      </nav>
+      {% endblock %}
+    </div>
+  </div>
+
+  <!-- Right Side: Command Palette, Theme Switcher, Quick Profile -->
+  <div class="kd-topbar-right">
+    <!-- Command Palette Trigger -->
+    <button class="kd-btn kd-btn-secondary kd-btn-sm d-none d-md-inline-flex" data-bs-toggle="modal" data-bs-target="#kdCommandPaletteModal" title="Quick Search (Ctrl+K)">
+      <i class="bi bi-search text-muted"></i>
+      <span class="text-muted small">Search...</span>
+      <kbd class="bg-surface-3 border border-secondary text-muted px-1 ms-2" style="font-size: 0.65rem;">⌘K</kbd>
+    </button>
+
+    <!-- Theme Toggler -->
+    <button type="button" class="kd-theme-toggle" aria-label="Toggle theme">
+      <i class="bi bi-sun-fill"></i>
+    </button>
+
+    <!-- User Dropdown (Mobile visible) -->
+    <div class="dropdown d-lg-none">
+      <button class="kd-btn kd-btn-outline kd-btn-sm p-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <div class="kd-avatar" style="width: 28px; height: 28px; font-size: 0.75rem;">
+          {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+        </div>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end kd-surface border" style="border-color: var(--kd-border-strong);">
+        <li><h6 class="dropdown-header text-muted">{{ request.user.get_full_name|default:request.user.username }}</h6></li>
+        {% if request.user.is_admin_user %}
+          <li><a class="dropdown-item text-secondary" href="{% url 'admin_portal:dashboard' %}"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+          <li><a class="dropdown-item text-secondary" href="{% url 'admin_portal:settings' %}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+        {% else %}
+          <li><a class="dropdown-item text-secondary" href="{% url 'student_portal:profile' %}"><i class="bi bi-person me-2"></i>Profile</a></li>
+        {% endif %}
+        <li><hr class="dropdown-divider border-secondary opacity-25"></li>
+        <li>
+          <form method="post" action="{% url 'accounts:logout' %}" class="px-2 m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Sign Out</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </div>
+</header>

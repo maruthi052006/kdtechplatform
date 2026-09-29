@@ -1,0 +1,134 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Batch Management | KDTechX{% endblock %}
+{% block page_title %}Batch Cohorts{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h4 fw-bold text-light mb-1">Training Batch Cohorts</h1>
+    <p class="text-muted small mb-0">Group candidates into training batches for schedule assignments and targeted assessments.</p>
+  </div>
+  <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createBatchModal">
+    <i class="bi bi-plus-circle"></i> Create Batch
+  </button>
+</div>
+
+<!-- Batches Table Card -->
+<div class="kd-table-card">
+  <div class="kd-table-toolbar">
+    <div class="kd-search-wrapper" style="max-width: 320px;">
+      <i class="bi bi-search kd-search-icon"></i>
+      <input type="text" class="kd-input kd-search-input" placeholder="Search batches..." data-table-search="batches-table">
+    </div>
+    <div class="text-muted small">
+      Total: <strong class="text-light">{{ batches.count }}</strong> batches
+    </div>
+  </div>
+
+  <div class="kd-table-responsive">
+    <table class="kd-table" id="batches-table">
+      <thead>
+        <tr>
+          <th>Batch Code</th>
+          <th>Cohort Name</th>
+          <th>Description</th>
+          <th>Enrolled Students</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for batch in batches %}
+        <tr>
+          <td><code class="text-primary fw-semibold">{{ batch.code }}</code></td>
+          <td class="fw-semibold text-light">{{ batch.name }}</td>
+          <td class="text-muted small">{{ batch.description|default:"—"|truncatewords:8 }}</td>
+          <td>
+            <span class="kd-badge kd-badge-neutral">
+              <i class="bi bi-people me-1"></i>{{ batch.student_count }}
+            </span>
+          </td>
+          <td>
+            <span class="kd-badge {% if batch.status == 'active' %}kd-badge-success{% else %}kd-badge-neutral{% endif %}">
+              <span class="kd-status-dot {% if batch.status == 'active' %}active{% else %}inactive{% endif %}"></span>
+              {{ batch.get_status_display }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ batch.created_at|date:"M d, Y" }}</td>
+          <td class="text-end">
+            <form method="post" action="{% url 'admin_portal:batch_toggle' batch.id %}" class="d-inline">
+              {% csrf_token %}
+              <button type="submit" class="kd-btn kd-btn-outline kd-btn-sm py-1 px-2" title="Toggle status">
+                {% if batch.status == 'active' %}
+                  <i class="bi bi-pause-circle text-warning"></i> Complete
+                {% else %}
+                  <i class="bi bi-play-circle text-success"></i> Reactivate
+                {% endif %}
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="kd-empty-state">
+              <div class="kd-empty-icon"><i class="bi bi-layers"></i></div>
+              <h3 class="kd-empty-title">No Batches Configured</h3>
+              <p class="kd-empty-desc">Create your first training cohort to organize students.</p>
+              <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createBatchModal">
+                Create First Batch
+              </button>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Create Batch Modal -->
+<div class="modal fade" id="createBatchModal" tabindex="-1" aria-labelledby="createBatchModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6" id="createBatchModalLabel">Create Training Batch</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:batches' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="kd-form-group">
+            <label for="batch_name" class="kd-label kd-label-required">Cohort Name</label>
+            <input type="text" id="batch_name" name="name" class="kd-input" placeholder="e.g. Python Full Stack 2026" required>
+          </div>
+          <div class="kd-form-group">
+            <label for="batch_code" class="kd-label kd-label-required">Batch Code</label>
+            <input type="text" id="batch_code" name="code" class="kd-input font-monospace" placeholder="e.g. PFS-2026-A" required>
+            <span class="kd-helper-text">Unique system identifier for the cohort.</span>
+          </div>
+          <div class="kd-form-group">
+            <label for="batch_desc" class="kd-label">Description (Optional)</label>
+            <textarea id="batch_desc" name="description" class="kd-textarea" placeholder="Cohort timing, room, or track details..."></textarea>
+          </div>
+          <div class="kd-form-group">
+            <label for="batch_status" class="kd-label">Initial Status</label>
+            <select id="batch_status" name="status" class="kd-select">
+              <option value="active" selected>Active</option>
+              <option value="completed">Completed</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Create Cohort</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

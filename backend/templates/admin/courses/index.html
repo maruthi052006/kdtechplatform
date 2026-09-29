@@ -1,0 +1,134 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Course Management | KDTechX{% endblock %}
+{% block page_title %}Courses{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h4 fw-bold text-light mb-1">Engineering Curricula & Courses</h1>
+    <p class="text-muted small mb-0">Manage training programs, week-by-week curriculum hierarchies, and cohort enrollments.</p>
+  </div>
+  <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createCourseModal">
+    <i class="bi bi-plus-circle"></i> Create Course
+  </button>
+</div>
+
+<!-- Courses Grid -->
+<div class="row g-4">
+  {% for course in courses %}
+  <div class="col-md-6 col-lg-4">
+    <div class="kd-card h-100 d-flex flex-column">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <span class="kd-course-code">{{ course.code }}</span>
+        <span class="kd-badge {% if course.status == 'published' %}kd-badge-success{% else %}kd-badge-warning{% endif %}">
+          {{ course.get_status_display }}
+        </span>
+      </div>
+
+      <h2 class="h5 fw-bold text-light mb-2">{{ course.name }}</h2>
+      <p class="text-muted small mb-4 flex-grow-1">{{ course.description|truncatewords:20 }}</p>
+
+      <div class="d-flex align-items-center gap-3 text-muted fs-xs mb-3 pb-3 border-bottom" style="border-color: var(--kd-border) !important;">
+        <span><i class="bi bi-clock me-1"></i>{{ course.duration_weeks }} Weeks</span>
+        <span><i class="bi bi-people me-1"></i>{{ course.student_count }} Students</span>
+        <span><i class="bi bi-ui-checks me-1"></i>{{ course.quiz_count }} Quizzes</span>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between gap-2">
+        <a href="{% url 'admin_portal:course_curriculum' course.id %}" class="kd-btn kd-btn-outline kd-btn-sm flex-grow-1">
+          <i class="bi bi-diagram-3"></i> Curriculum ({{ course.week_count }})
+        </a>
+        <a href="{% url 'admin_portal:course_students' course.id %}" class="kd-btn kd-btn-secondary kd-btn-sm" title="Manage Enrollments">
+          <i class="bi bi-person-check"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="kd-empty-state">
+      <div class="kd-empty-icon"><i class="bi bi-journal-code"></i></div>
+      <h3 class="kd-empty-title">No Courses Created</h3>
+      <p class="kd-empty-desc">Create your first engineering course to start building syllabus weeks and assessments.</p>
+      <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createCourseModal">
+        Create First Course
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Create Course Modal -->
+<div class="modal fade" id="createCourseModal" tabindex="-1" aria-labelledby="createCourseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6" id="createCourseModalLabel">Create Engineering Course</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:courses' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-8">
+              <div class="kd-form-group">
+                <label for="c_name" class="kd-label kd-label-required">Course Title</label>
+                <input type="text" id="c_name" name="name" class="kd-input" placeholder="e.g. Python Full Stack Engineering" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="c_code" class="kd-label kd-label-required">Course Code</label>
+                <input type="text" id="c_code" name="code" class="kd-input font-monospace" placeholder="e.g. PY-101" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="c_category" class="kd-label kd-label-required">Category</label>
+                <input type="text" id="c_category" name="category" class="kd-input" placeholder="e.g. Full Stack" required>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="c_level" class="kd-label">Difficulty Level</label>
+                <select id="c_level" name="level" class="kd-select">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate" selected>Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="c_duration" class="kd-label">Duration (Weeks)</label>
+                <input type="number" id="c_duration" name="duration_weeks" class="kd-input" value="8" min="1" max="52">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="kd-form-group">
+                <label for="c_desc" class="kd-label kd-label-required">Description & Objectives</label>
+                <textarea id="c_desc" name="description" class="kd-textarea" placeholder="Detailed syllabus overview and learning outcomes..." required></textarea>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="kd-form-group">
+                <label for="c_status" class="kd-label">Publication Status</label>
+                <select id="c_status" name="status" class="kd-select">
+                  <option value="draft">Draft (Private)</option>
+                  <option value="published" selected>Published (Candidate Visible)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Create Course</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

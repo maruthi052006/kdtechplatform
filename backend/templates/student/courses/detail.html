@@ -1,0 +1,93 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}{{ course.name }} | KDTechX{% endblock %}
+{% block page_title %}Curriculum Syllabus{% endblock %}
+
+{% block main_content %}
+<div class="mb-4">
+  <div class="d-flex align-items-center gap-2 mb-1">
+    <a href="{% url 'student_portal:courses' %}" class="text-muted text-decoration-none small">&larr; Back to My Courses</a>
+    <span class="text-muted small">&bull;</span>
+    <span class="kd-course-code">{{ course.code }}</span>
+  </div>
+  <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+    <div>
+      <h1 class="h4 fw-bold text-light mb-1">{{ course.name }}</h1>
+      <p class="text-muted small mb-0">{{ course.category }} &bull; {{ course.duration_weeks }} Weeks Total</p>
+    </div>
+    <span class="kd-badge kd-badge-primary text-uppercase">{{ course.level }}</span>
+  </div>
+</div>
+
+<!-- Course Overview Card -->
+<div class="kd-card mb-4 p-4">
+  <h2 class="h6 fw-bold text-light mb-2">Track Description & Learning Outcomes</h2>
+  <p class="text-muted small mb-0">{{ course.description }}</p>
+</div>
+
+<!-- Curriculum Timeline -->
+<div class="kd-curriculum-timeline">
+  {% for week in weeks %}
+  <div class="kd-week-block">
+    <div class="kd-week-marker"></div>
+    <div class="kd-week-header">
+      <div>
+        <span class="kd-week-badge">Week {{ week.week_number|stringformat:"02d" }}</span>
+        <h3 class="h5 fw-bold text-light mb-1 mt-1">{{ week.title }}</h3>
+        {% if week.description %}
+          <p class="text-muted small mb-0">{{ week.description }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Topics List -->
+    <div class="kd-topic-list">
+      {% for topic in week.topics.all %}
+      <div class="kd-topic-item">
+        <span class="kd-topic-num">{{ forloop.counter|stringformat:"02d" }}</span>
+        <div>
+          <span class="fw-medium text-light">{{ topic.title }}</span>
+          {% if topic.summary %}
+            <div class="text-muted fs-xs">{{ topic.summary }}</div>
+          {% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-muted fs-xs py-2 px-3 rounded bg-surface-3">
+        Topics covered during lecture hours.
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Quizzes linked to this week -->
+    {% if week.quizzes.all %}
+    <div class="mt-3 pt-3 border-top" style="border-color: var(--kd-border) !important;">
+      <span class="text-muted fs-xs text-uppercase fw-bold letter-spacing-1 d-block mb-2">Assessments</span>
+      <div class="d-flex flex-wrap gap-2">
+        {% for q in week.quizzes.all %}
+        <div class="p-2 px-3 rounded border d-flex align-items-center justify-content-between gap-3 w-100" style="background-color: var(--kd-surface-2); border-color: var(--kd-border) !important;">
+          <div>
+            <div class="fw-semibold text-light small">{{ q.title }}</div>
+            <div class="text-muted fs-xs">{{ q.duration_minutes }} Mins &bull; Deadline: {{ q.deadline|date:"M d, H:i" }}</div>
+          </div>
+          <div>
+            <a href="{% url 'student_portal:quiz_take' q.id %}" class="kd-btn kd-btn-primary kd-btn-sm">
+              <i class="bi bi-pencil-square"></i> Take Assessment
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+  {% empty %}
+  <div class="kd-empty-state">
+    <div class="kd-empty-icon"><i class="bi bi-diagram-3"></i></div>
+    <h3 class="kd-empty-title">Curriculum in Preparation</h3>
+    <p class="kd-empty-desc">Your instructor has not yet released the weekly syllabus for this course.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

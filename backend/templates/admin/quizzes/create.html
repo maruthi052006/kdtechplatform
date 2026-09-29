@@ -1,0 +1,237 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Create Assessment | KDTechX{% endblock %}
+{% block page_title %}Assessment Stepper Builder{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-9">
+    <div class="mb-4">
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <a href="{% url 'admin_portal:quizzes' %}" class="text-muted text-decoration-none small">&larr; Back to Quizzes</a>
+      </div>
+      <h1 class="h4 fw-bold text-light mb-1">Create Weekly Assessment</h1>
+      <p class="text-muted small mb-0">Configure exam parameters, select question items, and set anti-cheat policies.</p>
+    </div>
+
+    <form method="post" action="{% url 'admin_portal:quiz_create' %}">
+      {% csrf_token %}
+
+      <!-- Step 1: Basic Information -->
+      <div class="kd-card mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--kd-border) !important;">
+          <span class="kd-badge kd-badge-primary">01</span>
+          <h2 class="h6 fw-bold text-light mb-0">Basic Information</h2>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="q_course" class="kd-label kd-label-required">Course</label>
+              <select id="q_course" name="course_id" class="kd-select" required onchange="filterQuestionsByCourse(this.value)">
+                <option value="">-- Choose Course --</option>
+                {% for c in courses %}
+                  <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="q_week" class="kd-label">Curriculum Week (Optional)</label>
+              <select id="q_week" name="week_id" class="kd-select">
+                <option value="">-- Select Week --</option>
+                {% for c in courses %}
+                  {% for w in c.weeks.all %}
+                    <option value="{{ w.id }}" data-course-id="{{ c.id }}">
+                      [{{ c.code }}] Week {{ w.week_number }}: {{ w.title }}
+                    </option>
+                  {% endfor %}
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="kd-form-group">
+              <label for="q_title" class="kd-label kd-label-required">Assessment Title</label>
+              <input type="text" id="q_title" name="title" class="kd-input" placeholder="e.g. Week 02: Advanced Functional Programming Quiz" required>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="kd-form-group">
+              <label for="q_desc" class="kd-label">Instructions / Description</label>
+              <textarea id="q_desc" name="description" class="kd-textarea" placeholder="Assessment rules, topics tested, passing criteria..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Question Selection -->
+      <div class="kd-card mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style="border-color: var(--kd-border) !important;">
+          <div class="d-flex align-items-center gap-2">
+            <span class="kd-badge kd-badge-primary">02</span>
+            <h2 class="h6 fw-bold text-light mb-0">Select Question Bank Items</h2>
+          </div>
+          <span class="text-muted small" id="selected-questions-counter">Selected: <strong>0</strong> questions</span>
+        </div>
+
+        <div class="kd-table-responsive" style="max-height: 320px; overflow-y: auto;">
+          <table class="kd-table table-sm">
+            <thead>
+              <tr>
+                <th style="width: 40px;">Select</th>
+                <th>Course</th>
+                <th>Question Prompt</th>
+                <th>Difficulty</th>
+                <th>Marks</th>
+              </tr>
+            </thead>
+            <tbody id="questions-selection-tbody">
+              {% for c in courses %}
+                {% for q in c.questions.all %}
+                <tr class="question-row" data-course-id="{{ c.id }}">
+                  <td>
+                    <input type="checkbox" name="questions" value="{{ q.id }}" class="question-checkbox" onchange="updateSelectedCount()">
+                  </td>
+                  <td><span class="kd-course-code">{{ c.code }}</span></td>
+                  <td>
+                    <div class="fw-medium text-light text-truncate" style="max-width: 380px;">{{ q.question_text }}</div>
+                  </td>
+                  <td><span class="kd-badge kd-badge-neutral">{{ q.get_difficulty_display }}</span></td>
+                  <td class="kd-tnum text-secondary">{{ q.marks }}</td>
+                </tr>
+                {% endfor %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Step 3: Exam Engine & Security Settings -->
+      <div class="kd-card mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--kd-border) !important;">
+          <span class="kd-badge kd-badge-primary">03</span>
+          <h2 class="h6 fw-bold text-light mb-0">Timing & Security Parameters</h2>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-4">
+            <div class="kd-form-group">
+              <label for="duration_mins" class="kd-label kd-label-required">Duration (Minutes)</label>
+              <input type="number" id="duration_mins" name="duration_minutes" class="kd-input" value="30" min="5" max="300" required>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kd-form-group">
+              <label for="pass_pct" class="kd-label kd-label-required">Pass Percentage (%)</label>
+              <input type="number" id="pass_pct" name="pass_percentage" class="kd-input" value="60" min="1" max="100" required>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="kd-form-group">
+              <label for="neg_marks" class="kd-label">Negative Marks Per Wrong Choice</label>
+              <input type="number" id="neg_marks" name="negative_marks" class="kd-input" value="0.25" step="0.25" min="0">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="kd-checkbox d-block mb-2">
+              <input type="checkbox" name="negative_marking" checked>
+              <span>Enable Negative Marking Deductions</span>
+            </label>
+            <label class="kd-checkbox d-block mb-2">
+              <input type="checkbox" name="random_questions" checked>
+              <span>Randomize Question Order per Student</span>
+            </label>
+            <label class="kd-checkbox d-block">
+              <input type="checkbox" name="random_options" checked>
+              <span>Scramble Option Keys (A, B, C, D) per Student</span>
+            </label>
+          </div>
+
+          <div class="col-md-6">
+            <label class="kd-checkbox d-block mb-2">
+              <input type="checkbox" name="require_fullscreen" checked>
+              <span>Require Distraction-Free Fullscreen</span>
+            </label>
+            <label class="kd-checkbox d-block mb-2">
+              <input type="checkbox" name="prevent_copy" checked>
+              <span>Shield Clipboard & Prevent Copy/Cut/Paste</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Schedule Timeline -->
+      <div class="kd-card mb-4">
+        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom" style="border-color: var(--kd-border) !important;">
+          <span class="kd-badge kd-badge-primary">04</span>
+          <h2 class="h6 fw-bold text-light mb-0">Availability Schedule</h2>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="start_at" class="kd-label kd-label-required">Open Assessment From</label>
+              <input type="datetime-local" id="start_at" name="start_at" class="kd-input" required>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="deadline" class="kd-label kd-label-required">Submission Deadline</label>
+              <input type="datetime-local" id="deadline" name="deadline" class="kd-input" required>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit & Publish -->
+      <div class="d-flex align-items-center justify-content-between pt-2">
+        <a href="{% url 'admin_portal:quizzes' %}" class="kd-btn kd-btn-outline kd-btn-sm">Cancel</a>
+        <button type="submit" class="kd-btn kd-btn-primary kd-btn-lg">
+          <i class="bi bi-rocket-takeoff"></i> Publish Assessment
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function filterQuestionsByCourse(courseId) {
+  const rows = document.querySelectorAll('.question-row');
+  rows.forEach(r => {
+    if (!courseId || r.getAttribute('data-course-id') === courseId) {
+      r.style.display = '';
+    } else {
+      r.style.display = 'none';
+      r.querySelector('input[type="checkbox"]').checked = false;
+    }
+  });
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const checked = document.querySelectorAll('.question-checkbox:checked').length;
+  document.getElementById('selected-questions-counter').innerHTML = `Selected: <strong>${checked}</strong> questions`;
+}
+
+// Preset default start_at to now and deadline to +7 days
+document.addEventListener('DOMContentLoaded', () => {
+  const now = new Date();
+  const formatIso = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  
+  const startInput = document.getElementById('start_at');
+  const deadlineInput = document.getElementById('deadline');
+  
+  if (startInput && !startInput.value) {
+    startInput.value = formatIso(now);
+  }
+  if (deadlineInput && !deadlineInput.value) {
+    const deadline = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+    deadlineInput.value = formatIso(deadline);
+  }
+});
+</script>
+{% endblock %}

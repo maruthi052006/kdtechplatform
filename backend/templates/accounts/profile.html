@@ -1,0 +1,73 @@
+{% extends request.user.is_admin_user|yesno:'base_admin.html,base_student.html' %}
+{% load static %}
+
+{% block title %}Account Profile | KDTechX{% endblock %}
+{% block page_title %}Profile Settings{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom" style="border-color: var(--kd-border) !important;">
+        <div class="kd-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">
+          {{ user.first_name|default:user.username|make_list|first|upper }}
+        </div>
+        <div>
+          <h2 class="h4 fw-bold text-light mb-1">{{ user.get_full_name|default:user.username }}</h2>
+          <div class="d-flex align-items-center gap-2">
+            <span class="kd-badge {% if user.is_admin_user %}kd-badge-primary{% else %}kd-badge-success{% endif %}">
+              {{ user.get_role_display|default:user.role }}
+            </span>
+            {% if user.student_profile %}
+              <span class="text-muted small">ID: <strong class="text-light">{{ user.student_profile.student_id }}</strong></span>
+              {% if user.student_profile.batch %}
+                <span class="text-muted small">&bull; Batch: <strong class="text-light">{{ user.student_profile.batch.name }}</strong></span>
+              {% endif %}
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <form method="post" action="{% url 'accounts:profile' %}">
+        {% csrf_token %}
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="first_name" class="kd-label">First Name</label>
+              <input type="text" id="first_name" name="first_name" class="kd-input" value="{{ user.first_name }}">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="kd-form-group">
+              <label for="last_name" class="kd-label">Last Name</label>
+              <input type="text" id="last_name" name="last_name" class="kd-input" value="{{ user.last_name }}">
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="kd-form-group">
+              <label for="email" class="kd-label">Email Address</label>
+              <input type="email" id="email" name="email" class="kd-input" value="{{ user.email }}" required>
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="kd-form-group">
+              <label class="kd-label">Username</label>
+              <input type="text" class="kd-input" value="{{ user.username }}" disabled>
+              <span class="kd-helper-text">System login username cannot be changed.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--kd-border) !important;">
+          <a href="{% url 'accounts:change_password' %}" class="kd-btn kd-btn-outline kd-btn-sm">
+            <i class="bi bi-key"></i> Change Password
+          </a>
+          <button type="submit" class="kd-btn kd-btn-primary">
+            <i class="bi bi-check2"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

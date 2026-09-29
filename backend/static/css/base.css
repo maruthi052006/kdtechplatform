@@ -1,0 +1,145 @@
+/* ==========================================================================
+   KDTechX Base Styles & Reset
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--kd-font-sans);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color-scheme: dark light;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--kd-bg);
+  color: var(--kd-text);
+  min-height: 100vh;
+  transition: background-color var(--kd-transition-base), color var(--kd-transition-base);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--kd-border-strong);
+  border-radius: var(--kd-radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kd-text-muted);
+}
+
+/* Selection Color */
+::selection {
+  background-color: var(--kd-primary-tint);
+  color: var(--kd-primary);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--kd-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 0;
+}
+
+h1 { font-size: 1.875rem; line-height: 1.25; }
+h2 { font-size: 1.500rem; line-height: 1.30; }
+h3 { font-size: 1.250rem; line-height: 1.35; }
+h4 { font-size: 1.000rem; line-height: 1.40; }
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--kd-space-3);
+  color: var(--kd-text-secondary);
+}
+
+a {
+  color: var(--kd-primary);
+  text-decoration: none;
+  transition: color var(--kd-transition-fast);
+}
+
+a:hover {
+  color: var(--kd-primary-hover);
+}
+
+code, kbd, samp, pre {
+  font-family: var(--kd-font-mono);
+  font-size: 0.875em;
+}
+
+/* Tabular Figures for Numbers, Timers, Percentages */
+.kd-tnum, .metric-value, .quiz-timer, .badge-count {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* Atmospheric Backgrounds */
+.kd-bg-grid {
+  background-image: 
+    linear-gradient(to right, var(--kd-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--kd-grid-color) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.kd-glow-radial {
+  position: absolute;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 480px;
+  background: radial-gradient(circle, var(--kd-glow-color) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Surface Utility Classes */
+.kd-surface {
+  background-color: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-lg);
+}
+
+.kd-surface-2 {
+  background-color: var(--kd-surface-2);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-lg);
+}
+
+.kd-card {
+  background-color: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-lg);
+  padding: var(--kd-space-5);
+  box-shadow: var(--kd-shadow-card);
+  transition: border-color var(--kd-transition-fast), transform var(--kd-transition-fast);
+}
+
+.kd-card-hover:hover {
+  border-color: var(--kd-border-strong);
+  transform: translateY(-2px);
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

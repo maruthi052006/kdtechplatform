@@ -1,0 +1,106 @@
+{% load static %}
+<aside class="kd-sidebar">
+  <!-- Brand Header -->
+  <div class="kd-sidebar-header">
+    <a href="{% url 'admin_portal:dashboard' %}" class="kd-sidebar-brand">
+      <div class="kd-brand-logo">K</div>
+      <div class="kd-brand-text">
+        <span class="kd-brand-name">KDTechX</span>
+        <span class="kd-brand-tagline">Trainer Console</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- Navigation Groups -->
+  <div class="kd-sidebar-content">
+    <!-- OVERVIEW -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Overview</div>
+      <a href="{% url 'admin_portal:dashboard' %}" class="kd-nav-item {% if active_nav == 'dashboard' %}active{% endif %}">
+        <i class="bi bi-speedometer2"></i>
+        <span>Dashboard</span>
+      </a>
+    </div>
+
+    <!-- LEARNING -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Learning</div>
+      <a href="{% url 'admin_portal:courses' %}" class="kd-nav-item {% if active_nav == 'courses' %}active{% endif %}">
+        <i class="bi bi-journal-code"></i>
+        <span>Courses</span>
+      </a>
+      <a href="{% url 'admin_portal:students' %}" class="kd-nav-item {% if active_nav == 'students' %}active{% endif %}">
+        <i class="bi bi-people"></i>
+        <span>Students</span>
+      </a>
+      <a href="{% url 'admin_portal:batches' %}" class="kd-nav-item {% if active_nav == 'batches' %}active{% endif %}">
+        <i class="bi bi-layers"></i>
+        <span>Batches</span>
+      </a>
+    </div>
+
+    <!-- ASSESSMENT -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Assessment</div>
+      <a href="{% url 'admin_portal:questions' %}" class="kd-nav-item {% if active_nav == 'questions' %}active{% endif %}">
+        <i class="bi bi-database"></i>
+        <span>Question Bank</span>
+      </a>
+      <a href="{% url 'admin_portal:questions_import' %}" class="kd-nav-item {% if active_nav == 'questions_import' %}active{% endif %}">
+        <i class="bi bi-file-earmark-excel"></i>
+        <span>Excel Import</span>
+      </a>
+      <a href="{% url 'admin_portal:quizzes' %}" class="kd-nav-item {% if active_nav == 'quizzes' %}active{% endif %}">
+        <i class="bi bi-ui-checks-grid"></i>
+        <span>Weekly Quizzes</span>
+      </a>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">Insights</div>
+      <a href="{% url 'admin_portal:results' %}" class="kd-nav-item {% if active_nav == 'results' %}active{% endif %}">
+        <i class="bi bi-trophy"></i>
+        <span>Results</span>
+      </a>
+      <a href="{% url 'admin_portal:analytics' %}" class="kd-nav-item {% if active_nav == 'analytics' %}active{% endif %}">
+        <i class="bi bi-graph-up"></i>
+        <span>Analytics</span>
+      </a>
+    </div>
+
+    <!-- COMMUNICATION & SYSTEM -->
+    <div class="kd-nav-group">
+      <div class="kd-nav-header">System</div>
+      <a href="{% url 'admin_portal:announcements' %}" class="kd-nav-item {% if active_nav == 'announcements' %}active{% endif %}">
+        <i class="bi bi-megaphone"></i>
+        <span>Announcements</span>
+      </a>
+      <a href="{% url 'admin_portal:settings' %}" class="kd-nav-item {% if active_nav == 'settings' %}active{% endif %}">
+        <i class="bi bi-gear"></i>
+        <span>Settings</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- User Profile & Session Footer -->
+  <div class="kd-sidebar-footer">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-2 overflow-hidden">
+        <div class="kd-avatar">
+          {{ request.user.first_name|default:request.user.username|make_list|first|upper }}
+        </div>
+        <div class="kd-user-info">
+          <span class="kd-user-name">{{ request.user.get_full_name|default:request.user.username }}</span>
+          <span class="kd-user-role">Trainer / Admin</span>
+        </div>
+      </div>
+      <form method="post" action="{% url 'accounts:logout' %}" class="m-0 p-0">
+        {% csrf_token %}
+        <button type="submit" class="kd-btn kd-btn-outline kd-btn-sm p-1 px-2 text-danger" title="Sign out">
+          <i class="bi bi-box-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</aside>

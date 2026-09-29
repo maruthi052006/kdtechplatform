@@ -1,0 +1,151 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} - Overview | KDTechX{% endblock %}
+{% block page_title %}Assessment Detail{% endblock %}
+
+{% block main_content %}
+<div class="mb-4">
+  <div class="d-flex align-items-center gap-2 mb-1">
+    <a href="{% url 'admin_portal:quizzes' %}" class="text-muted text-decoration-none small">&larr; Back to Quizzes</a>
+    <span class="text-muted small">&bull;</span>
+    <span class="kd-course-code">{{ quiz.course.code }}</span>
+    {% if quiz.week %}
+      <span class="kd-badge kd-badge-neutral">Week {{ quiz.week.week_number }}</span>
+    {% endif %}
+  </div>
+  <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3">
+    <div>
+      <h1 class="h4 fw-bold text-light mb-1">{{ quiz.title }}</h1>
+      <p class="text-muted small mb-0">{{ quiz.description|default:"No special candidate instructions provided." }}</p>
+    </div>
+    <span class="kd-badge {% if quiz.status == 'published' %}kd-badge-success{% else %}kd-badge-warning{% endif %} fs-6 py-1 px-3">
+      {{ quiz.get_status_display }}
+    </span>
+  </div>
+</div>
+
+<!-- Performance Metrics Bar -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Submissions</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ attempts.count }}</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Average Score</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ avg_score }}%</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Cohort Pass Rate</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ pass_rate }}%</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Time Allowed</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ quiz.duration_minutes }}m</div>
+    </div>
+  </div>
+</div>
+
+<!-- Attempts & Questions Tabs -->
+<ul class="nav nav-tabs border-bottom mb-4" style="border-color: var(--kd-border) !important;">
+  <li class="nav-item">
+    <button class="nav-link active bg-transparent text-light border-0 border-bottom border-primary fw-semibold" id="attempts-tab" data-bs-toggle="tab" data-bs-target="#attempts-pane" type="button">
+      Candidate Submissions ({{ attempts.count }})
+    </button>
+  </li>
+  <li class="nav-item">
+    <button class="nav-link bg-transparent text-muted border-0 fw-semibold" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions-pane" type="button">
+      Included Questions ({{ quiz_questions.count }})
+    </button>
+  </li>
+</ul>
+
+<div class="tab-content">
+  <!-- Attempts Pane -->
+  <div class="tab-pane fade show active" id="attempts-pane">
+    <div class="kd-table-card">
+      <div class="kd-table-responsive">
+        <table class="kd-table">
+          <thead>
+            <tr>
+              <th>Student ID</th>
+              <th>Candidate</th>
+              <th>Score</th>
+              <th>Percentage</th>
+              <th>Status</th>
+              <th>Time Taken</th>
+              <th>Violations</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for a in attempts %}
+            <tr>
+              <td><code class="text-primary fw-semibold">{{ a.student.student_id }}</code></td>
+              <td class="fw-semibold text-light">{{ a.student.user.get_full_name|default:a.student.user.username }}</td>
+              <td class="kd-tnum fw-bold">{{ a.score }} / {{ quiz.total_marks }}</td>
+              <td class="kd-tnum">{{ a.percentage }}%</td>
+              <td>
+                <span class="kd-badge {% if a.is_passed %}kd-badge-success{% else %}kd-badge-danger{% endif %}">
+                  {% if a.is_passed %}PASSED{% else %}FAILED{% endif %}
+                </span>
+              </td>
+              <td class="text-muted small kd-tnum">{{ a.time_taken_seconds }}s</td>
+              <td>
+                {% if a.tab_violations > 0 %}
+                  <span class="kd-badge kd-badge-danger">{{ a.tab_violations }} tab switches</span>
+                {% else %}
+                  <span class="kd-badge kd-badge-neutral">Clean</span>
+                {% endif %}
+              </td>
+              <td class="text-muted small">{{ a.submitted_at|date:"M d, H:i"|default:"In Progress" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center py-4 text-muted small">No candidate attempts recorded yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Questions Pane -->
+  <div class="tab-pane fade" id="questions-pane">
+    <div class="kd-table-card">
+      <div class="kd-table-responsive">
+        <table class="kd-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">Order</th>
+              <th>Question Statement</th>
+              <th>Difficulty</th>
+              <th>Marks</th>
+              <th>Correct Choice</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for qq in quiz_questions %}
+            <tr>
+              <td class="text-muted small kd-tnum fw-bold">{{ qq.order|stringformat:"02d" }}</td>
+              <td class="fw-medium text-light">{{ qq.question.question_text }}</td>
+              <td><span class="kd-badge kd-badge-neutral">{{ qq.question.get_difficulty_display }}</span></td>
+              <td class="kd-tnum text-secondary">{{ qq.marks }}</td>
+              <td><span class="kd-badge kd-badge-success font-monospace">{{ qq.question.correct_answer }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

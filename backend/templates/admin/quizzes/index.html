@@ -1,0 +1,105 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Weekly Assessments | KDTechX{% endblock %}
+{% block page_title %}Weekly Quizzes{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h4 fw-bold text-light mb-1">Weekly Assessments & Exams</h1>
+    <p class="text-muted small mb-0">Schedule curriculum quizzes, enforce anti-cheat flags, and monitor candidate attempts.</p>
+  </div>
+  <a href="{% url 'admin_portal:quiz_create' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+    <i class="bi bi-plus-circle"></i> Create Assessment
+  </a>
+</div>
+
+<!-- Quizzes Table Card -->
+<div class="kd-table-card">
+  <div class="kd-table-toolbar">
+    <div class="kd-search-wrapper" style="max-width: 320px;">
+      <i class="bi bi-search kd-search-icon"></i>
+      <input type="text" class="kd-input kd-search-input" placeholder="Search assessments..." data-table-search="quizzes-table">
+    </div>
+    <div class="text-muted small">
+      Total: <strong class="text-light">{{ quizzes.count }}</strong> quizzes
+    </div>
+  </div>
+
+  <div class="kd-table-responsive">
+    <table class="kd-table" id="quizzes-table">
+      <thead>
+        <tr>
+          <th>Assessment Title</th>
+          <th>Course</th>
+          <th>Curriculum Week</th>
+          <th>Duration</th>
+          <th>Pass %</th>
+          <th>Questions</th>
+          <th>Submissions</th>
+          <th>Deadline</th>
+          <th>Status</th>
+          <th class="text-end">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for quiz in quizzes %}
+        <tr>
+          <td>
+            <a href="{% url 'admin_portal:quiz_detail' quiz.id %}" class="fw-semibold text-light text-decoration-none">
+              {{ quiz.title }}
+            </a>
+          </td>
+          <td><span class="kd-course-code">{{ quiz.course.code }}</span></td>
+          <td>
+            {% if quiz.week %}
+              <span class="kd-badge kd-badge-neutral">Week {{ quiz.week.week_number }}</span>
+            {% else %}
+              <span class="text-muted small">General</span>
+            {% endif %}
+          </td>
+          <td class="kd-tnum text-secondary">{{ quiz.duration_minutes }} mins</td>
+          <td class="kd-tnum text-secondary">{{ quiz.pass_percentage }}%</td>
+          <td>
+            <span class="kd-badge kd-badge-neutral">
+              <i class="bi bi-ui-checks me-1"></i>{{ quiz.question_count }}
+            </span>
+          </td>
+          <td>
+            <span class="kd-badge kd-badge-primary">
+              <i class="bi bi-person-check me-1"></i>{{ quiz.attempt_count }}
+            </span>
+          </td>
+          <td class="text-muted small">{{ quiz.deadline|date:"M d, H:i" }}</td>
+          <td>
+            <span class="kd-badge {% if quiz.status == 'published' %}kd-badge-success{% else %}kd-badge-warning{% endif %}">
+              <span class="kd-status-dot {% if quiz.status == 'published' %}active{% else %}warning{% endif %}"></span>
+              {{ quiz.get_status_display }}
+            </span>
+          </td>
+          <td class="text-end">
+            <a href="{% url 'admin_portal:quiz_detail' quiz.id %}" class="kd-btn kd-btn-outline kd-btn-sm py-1 px-2" title="Inspect details">
+              <i class="bi bi-arrow-right"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="10" class="text-center py-5">
+            <div class="kd-empty-state">
+              <div class="kd-empty-icon"><i class="bi bi-ui-checks-grid"></i></div>
+              <h3 class="kd-empty-title">No Assessments Scheduled</h3>
+              <p class="kd-empty-desc">Create your first weekly assessment by selecting questions from your question bank.</p>
+              <a href="{% url 'admin_portal:quiz_create' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+                Build First Assessment
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

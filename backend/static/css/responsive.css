@@ -1,0 +1,75 @@
+/* ==========================================================================
+   KDTechX Responsive Breakpoint Optimization (320px - 2560px)
+   ========================================================================== */
+
+/* Mobile Phones (Portrait: 320px - 480px) */
+@media (max-width: 480px) {
+  .kd-topbar {
+    height: 56px;
+    padding: 0 var(--kd-space-3);
+  }
+
+  .kd-content-container {
+    padding: var(--kd-space-3);
+  }
+
+  .kd-auth-card {
+    padding: var(--kd-space-5);
+  }
+
+  .kd-kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kd-stat-value {
+    font-size: 1.5rem;
+  }
+
+  .kd-table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .kd-quiz-bar {
+    padding: 8px 12px;
+  }
+
+  .kd-exam-body {
+    padding: var(--kd-space-3);
+  }
+
+  .kd-btn-lg {
+    padding: 10px 16px;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Tablets & Mobile Landscape (481px - 768px) */
+@media (max-width: 768px) {
+  .kd-dashboard-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .kd-course-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kd-question-card {
+    padding: var(--kd-space-4);
+  }
+}
+
+/* Tablets (769px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --kd-sidebar-width: 240px;
+  }
+}
+
+/* Ultrawide & 4K Displays (1920px - 2560px) */
+@media (min-width: 1920px) {
+  .kd-content-container {
+    max-width: 1680px;
+  }
+}

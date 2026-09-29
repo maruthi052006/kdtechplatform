@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Trainer Console Login | KDTechX{% endblock %}
+
+{% block content %}
+<div class="kd-auth-wrapper kd-bg-grid">
+  <div class="kd-glow-radial"></div>
+
+  <div class="kd-auth-card">
+    <div class="kd-auth-header">
+      <a href="{% url 'public:landing' %}" class="d-inline-flex align-items-center gap-2 text-decoration-none mb-3">
+        <div class="kd-brand-logo">K</div>
+        <span class="kd-brand-name fs-5">KDTechX</span>
+      </a>
+      <div class="d-block">
+        <span class="kd-auth-badge admin">Trainer & Administrator</span>
+      </div>
+      <h1 class="kd-auth-title">Console Sign In</h1>
+      <p class="kd-auth-subtitle">Enter your trainer credentials to access cohort management</p>
+    </div>
+
+    <form method="post" action="{% url 'accounts:admin_login' %}">
+      {% csrf_token %}
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <div class="kd-form-group">
+        <label for="id_identifier" class="kd-label kd-label-required">Username or Email</label>
+        <div class="kd-search-wrapper">
+          <i class="bi bi-person kd-search-icon"></i>
+          <input type="text" id="id_identifier" name="identifier" class="kd-input kd-search-input" placeholder="e.g. trainer@kdtechx.edu" value="{{ identifier|default:'' }}" required autofocus>
+        </div>
+      </div>
+
+      <div class="kd-form-group mb-4">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <label for="id_password" class="kd-label kd-label-required m-0">Password</label>
+        </div>
+        <div class="position-relative d-flex align-items-center">
+          <i class="bi bi-lock kd-search-icon" style="left: 12px; position: absolute; color: var(--kd-text-muted);"></i>
+          <input type="password" id="id_password" name="password" class="kd-input" style="padding-left: 36px; padding-right: 40px;" placeholder="••••••••••••" required>
+          <button type="button" class="btn btn-link position-absolute end-0 me-2 text-muted p-0" onclick="togglePasswordVisibility('id_password', this)">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="kd-btn kd-btn-primary w-100 py-2 fs-6">
+        <i class="bi bi-shield-lock"></i>
+        <span>Authenticate & Access Console</span>
+      </button>
+    </form>
+
+    <div class="kd-auth-footer d-flex flex-column gap-2">
+      <div>
+        <span class="text-muted">Are you a candidate / student?</span>
+        <a href="{% url 'accounts:student_login' %}" class="fw-medium ms-1">Go to Student Login</a>
+      </div>
+      <div class="mt-2 text-muted" style="font-size: 0.72rem;">
+        <i class="bi bi-shield-check text-success me-1"></i> End-to-end TLS encrypted & session guarded
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

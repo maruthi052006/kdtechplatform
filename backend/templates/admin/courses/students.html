@@ -1,0 +1,177 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ course.name }} - Students | KDTechX{% endblock %}
+{% block page_title %}Course Enrollments{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <a href="{% url 'admin_portal:courses' %}" class="text-muted text-decoration-none small">&larr; Back to Courses</a>
+      <span class="text-muted small">&bull;</span>
+      <span class="kd-course-code">{{ course.code }}</span>
+    </div>
+    <h1 class="h4 fw-bold text-light mb-0">{{ course.name }}</h1>
+    <p class="text-muted small mb-0">{{ enrollments.count }} Enrolled Candidates</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <button type="button" class="kd-btn kd-btn-secondary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#enrollBatchModal">
+      <i class="bi bi-layers"></i> Enroll Batch Cohort
+    </button>
+    <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">
+      <i class="bi bi-person-plus"></i> Enroll Student
+    </button>
+  </div>
+</div>
+
+<!-- Enrollments Table Card -->
+<div class="kd-table-card">
+  <div class="kd-table-toolbar">
+    <div class="kd-search-wrapper" style="max-width: 320px;">
+      <i class="bi bi-search kd-search-icon"></i>
+      <input type="text" class="kd-input kd-search-input" placeholder="Search enrolled students..." data-table-search="enrolled-students-table">
+    </div>
+    <div class="text-muted small">
+      Enrolled: <strong class="text-light">{{ enrollments.count }}</strong>
+    </div>
+  </div>
+
+  <div class="kd-table-responsive">
+    <table class="kd-table" id="enrolled-students-table">
+      <thead>
+        <tr>
+          <th>Student ID</th>
+          <th>Candidate</th>
+          <th>Batch</th>
+          <th>Enrollment Date</th>
+          <th>Status</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for en in enrollments %}
+        <tr>
+          <td><code class="text-primary fw-semibold">{{ en.student.student_id }}</code></td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="kd-avatar" style="width: 28px; height: 28px; font-size: 0.75rem;">
+                {{ en.student.user.first_name|default:en.student.user.username|make_list|first|upper }}
+              </div>
+              <div>
+                <div class="fw-semibold text-light">{{ en.student.user.get_full_name|default:en.student.user.username }}</div>
+                <div class="text-muted fs-xs">{{ en.student.user.email }}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            {% if en.student.batch %}
+              <span class="kd-badge kd-badge-neutral">{{ en.student.batch.name }}</span>
+            {% else %}
+              <span class="text-muted small">Individual</span>
+            {% endif %}
+          </td>
+          <td class="text-muted small">{{ en.assigned_at|date:"M d, Y" }}</td>
+          <td>
+            <span class="kd-badge kd-badge-success">
+              <span class="kd-status-dot active"></span>{{ en.get_status_display }}
+            </span>
+          </td>
+          <td class="text-end">
+            <form method="post" action="{% url 'admin_portal:course_students' course.id %}" class="d-inline" onsubmit="return confirm('Remove this student from the course?');">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="remove_student">
+              <input type="hidden" name="enrollment_id" value="{{ en.id }}">
+              <button type="submit" class="kd-btn kd-btn-danger kd-btn-sm py-1 px-2" title="Unenroll student">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            <div class="kd-empty-state">
+              <div class="kd-empty-icon"><i class="bi bi-people"></i></div>
+              <h3 class="kd-empty-title">No Students Enrolled</h3>
+              <p class="kd-empty-desc">Assign a training batch or individual students to this course.</p>
+              <div class="d-flex gap-2 justify-content-center">
+                <button type="button" class="kd-btn kd-btn-secondary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#enrollBatchModal">
+                  Enroll Batch
+                </button>
+                <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#enrollStudentModal">
+                  Enroll Student
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Enroll Individual Student Modal -->
+<div class="modal fade" id="enrollStudentModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6">Enroll Student in {{ course.code }}</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:course_students' course.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="enroll_student">
+        <div class="modal-body">
+          <div class="kd-form-group">
+            <label for="student_select" class="kd-label kd-label-required">Select Candidate</label>
+            <select id="student_select" name="student_id" class="kd-select" required>
+              <option value="">-- Choose student --</option>
+              {% for stu in available_students %}
+                <option value="{{ stu.id }}">{{ stu.student_id }} - {{ stu.user.get_full_name|default:stu.user.username }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Confirm Enrollment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Enroll Entire Batch Modal -->
+<div class="modal fade" id="enrollBatchModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6">Enroll Batch Cohort</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:course_students' course.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="enroll_batch">
+        <div class="modal-body">
+          <div class="kd-form-group">
+            <label for="batch_select" class="kd-label kd-label-required">Select Batch Cohort</label>
+            <select id="batch_select" name="batch_id" class="kd-select" required>
+              <option value="">-- Choose batch --</option>
+              {% for b in batches %}
+                <option value="{{ b.id }}">{{ b.name }} ({{ b.code }})</option>
+              {% endfor %}
+            </select>
+            <span class="kd-helper-text">All active candidates in this batch will be enrolled in the course.</span>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Enroll Batch</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

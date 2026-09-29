@@ -1,0 +1,113 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Announcements | KDTechX{% endblock %}
+{% block page_title %}Cohort Announcements{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h4 fw-bold text-light mb-1">Cohort Broadcasts & Announcements</h1>
+    <p class="text-muted small mb-0">Publish technical notices, exam schedule changes, and cohort updates to candidate dashboards.</p>
+  </div>
+  <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+    <i class="bi bi-megaphone"></i> Post Announcement
+  </button>
+</div>
+
+<!-- Announcements List -->
+<div class="row g-4">
+  {% for ann in announcements %}
+  <div class="col-md-6">
+    <div class="kd-card h-100 d-flex flex-column">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="kd-badge {% if ann.priority == 'urgent' or ann.priority == 'high' %}kd-badge-danger{% else %}kd-badge-primary{% endif %} text-uppercase">
+          {{ ann.priority }}
+        </span>
+        <span class="text-muted fs-xs">{{ ann.created_at|date:"M d, Y" }}</span>
+      </div>
+
+      <h3 class="h6 fw-bold text-light mb-2">{{ ann.title }}</h3>
+      <p class="text-muted small mb-3 flex-grow-1" style="white-space: pre-line;">{{ ann.content }}</p>
+
+      <div class="d-flex align-items-center justify-content-between pt-2 border-top text-muted fs-xs" style="border-color: var(--kd-border) !important;">
+        <span>
+          {% if ann.batch %}
+            <i class="bi bi-layers me-1"></i>Batch: {{ ann.batch.name }}
+          {% elif ann.course %}
+            <i class="bi bi-journal me-1"></i>Course: {{ ann.course.code }}
+          {% else %}
+            <i class="bi bi-broadcast me-1"></i>All Students
+          {% endif %}
+        </span>
+        <span>By {{ ann.created_by.first_name|default:ann.created_by.username }}</span>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="kd-empty-state">
+      <div class="kd-empty-icon"><i class="bi bi-megaphone"></i></div>
+      <h3 class="kd-empty-title">No Announcements Published</h3>
+      <p class="kd-empty-desc">Broadcast updates to candidate portals regarding test schedules and class timings.</p>
+      <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+        Create First Announcement
+      </button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Create Announcement Modal -->
+<div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6">Broadcast Announcement</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:announcements' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="kd-form-group">
+            <label for="ann_title" class="kd-label kd-label-required">Notice Title</label>
+            <input type="text" id="ann_title" name="title" class="kd-input" placeholder="e.g. Schedule Update: Python Assessment moved to Friday" required>
+          </div>
+          <div class="kd-form-group">
+            <label for="ann_content" class="kd-label kd-label-required">Content Statement</label>
+            <textarea id="ann_content" name="content" class="kd-textarea" placeholder="Full details for the announcement..." required></textarea>
+          </div>
+          <div class="row g-2">
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="ann_priority" class="kd-label">Priority</label>
+                <select id="ann_priority" name="priority" class="kd-select">
+                  <option value="normal" selected>Normal</option>
+                  <option value="high">High</option>
+                  <option value="urgent">Urgent</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="ann_batch" class="kd-label">Target Batch (Optional)</label>
+                <select id="ann_batch" name="batch_id" class="kd-select">
+                  <option value="">-- All Batches --</option>
+                  {% for b in batches %}
+                    <option value="{{ b.id }}">{{ b.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Broadcast Notice</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

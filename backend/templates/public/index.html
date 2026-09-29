@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}KDTechX | Learn. Practice. Assess. Grow.{% endblock %}
+
+{% block content %}
+<div class="position-relative overflow-hidden">
+  <!-- Atmospheric Grid & Glow -->
+  <div class="kd-glow-radial"></div>
+  <div class="kd-bg-grid position-absolute top-0 start-0 w-100 h-100 opacity-50" style="pointer-events: none;"></div>
+
+  <!-- Public Header Navigation -->
+  <header class="container py-4 position-relative z-3">
+    <div class="d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center gap-3">
+        <div class="kd-brand-logo">K</div>
+        <div class="kd-brand-text">
+          <span class="kd-brand-name">KDTechX</span>
+          <span class="kd-brand-tagline">Assessment Portal</span>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <button type="button" class="kd-theme-toggle me-2" aria-label="Toggle theme">
+          <i class="bi bi-sun-fill"></i>
+        </button>
+        {% if request.user.is_authenticated %}
+          {% if request.user.is_admin_user %}
+            <a href="{% url 'admin_portal:dashboard' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+              <i class="bi bi-speedometer2"></i> Trainer Console
+            </a>
+          {% else %}
+            <a href="{% url 'student_portal:dashboard' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+              <i class="bi bi-grid-1x2"></i> Student Portal
+            </a>
+          {% endif %}
+        {% else %}
+          <a href="{% url 'accounts:student_login' %}" class="kd-btn kd-btn-secondary kd-btn-sm">
+            <i class="bi bi-person"></i> Student Login
+          </a>
+          <a href="{% url 'accounts:admin_login' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+            <i class="bi bi-shield-lock"></i> Trainer Login
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="container py-5 my-md-4 position-relative z-2 text-center">
+    <div class="row justify-content-center">
+      <div class="col-lg-9 col-xl-8">
+        <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4 border" style="background-color: var(--kd-surface-2); border-color: var(--kd-border-strong) !important; font-size: 0.8125rem;">
+          <span class="kd-status-dot active"></span>
+          <span class="text-secondary fw-medium">Enterprise Learning & Assessment Portal</span>
+          <span class="badge bg-primary text-white rounded-pill px-2 py-0 ms-1" style="font-size: 0.65rem;">v2.0</span>
+        </div>
+
+        <h1 class="display-4 fw-extrabold text-light mb-4" style="letter-spacing: -0.035em; line-height: 1.15;">
+          Learn. Practice. <br>
+          <span style="background: linear-gradient(135deg, var(--kd-primary) 0%, var(--kd-cyan) 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Assess. Grow.</span>
+        </h1>
+
+        <p class="lead text-muted mb-5 mx-auto" style="max-width: 600px; font-size: 1.125rem;">
+          The enterprise technical learning portal built for engineering cohorts. Structured weekly curricula, randomized server-evaluated assessments, and deterministic skill analytics.
+        </p>
+
+        <div class="d-flex flex-column flex-sm-row align-items-center justify-content-center gap-3 mb-5">
+          {% if request.user.is_authenticated %}
+            {% if request.user.is_admin_user %}
+              <a href="{% url 'admin_portal:dashboard' %}" class="kd-btn kd-btn-primary kd-btn-lg w-100 w-sm-auto">
+                <i class="bi bi-speedometer2"></i> Open Trainer Dashboard
+              </a>
+            {% else %}
+              <a href="{% url 'student_portal:dashboard' %}" class="kd-btn kd-btn-primary kd-btn-lg w-100 w-sm-auto">
+                <i class="bi bi-grid-1x2"></i> Continue Learning
+              </a>
+            {% endif %}
+          {% else %}
+            <a href="{% url 'accounts:student_login' %}" class="kd-btn kd-btn-primary kd-btn-lg w-100 w-sm-auto">
+              <i class="bi bi-box-arrow-in-right"></i> Enter Student Portal
+            </a>
+            <a href="{% url 'accounts:admin_login' %}" class="kd-btn kd-btn-secondary kd-btn-lg w-100 w-sm-auto">
+              <i class="bi bi-shield-lock"></i> Trainer Access
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- Technical Metrics Bar -->
+        <div class="row g-3 pt-4 border-top" style="border-color: var(--kd-border) !important;">
+          <div class="col-6 col-md-3">
+            <div class="metric-value fs-3 fw-bold text-light">100%</div>
+            <div class="text-muted small">Server Authoritative</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value fs-3 fw-bold text-light">&lt;50ms</div>
+            <div class="text-muted small">Answer Evaluation</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value fs-3 fw-bold text-light">PostgreSQL</div>
+            <div class="text-muted small">Source of Truth</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="metric-value fs-3 fw-bold text-light">Zero Trust</div>
+            <div class="text-muted small">Telemetry & Shield</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Technical Capabilities Grid -->
+  <section class="container py-5 position-relative z-2">
+    <div class="text-center mb-5">
+      <h2 class="h3 fw-bold text-light mb-2">Engineered for Technical Rigor</h2>
+      <p class="text-muted">Built from the ground up for software engineering bootcamps and enterprise cohorts.</p>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="kd-card h-100">
+          <div class="kd-stat-icon mb-3">
+            <i class="bi bi-cpu"></i>
+          </div>
+          <h3 class="h5 fw-semibold text-light mb-2">Server-Authoritative Engine</h3>
+          <p class="text-muted small mb-0">Exam timers, option scrambling, and scoring calculations are enforced in PostgreSQL transactions. Zero client score tampering possible.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="kd-card h-100">
+          <div class="kd-stat-icon mb-3">
+            <i class="bi bi-file-earmark-excel"></i>
+          </div>
+          <h3 class="h5 fw-semibold text-light mb-2">Excel Batch Ingestion</h3>
+          <p class="text-muted small mb-0">Upload hundreds of questions in seconds. Pre-flight validation parses rows in memory, highlighting formatting errors before committing.</p>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="kd-card h-100">
+          <div class="kd-stat-icon mb-3">
+            <i class="bi bi-bar-chart-line"></i>
+          </div>
+          <h3 class="h5 fw-semibold text-light mb-2">Cohort Intelligence</h3>
+          <p class="text-muted small mb-0">Granular visibility into cohort distributions, topic-by-topic comprehension gaps, and assessment completion velocity.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Courses Preview -->
+  {% if courses %}
+  <section class="container py-5 position-relative z-2">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <div>
+        <h2 class="h4 fw-bold text-light mb-1">Active Learning Cohorts</h2>
+        <p class="text-muted small mb-0">Structured engineering curricula currently running on KDTechX.</p>
+      </div>
+      {% if not request.user.is_authenticated %}
+        <a href="{% url 'accounts:student_login' %}" class="kd-btn kd-btn-outline kd-btn-sm">Sign in to View</a>
+      {% endif %}
+    </div>
+
+    <div class="row g-4">
+      {% for course in courses %}
+      <div class="col-md-6 col-lg-4">
+        <div class="kd-course-card h-100">
+          <div class="kd-course-body">
+            <div class="kd-course-header">
+              <span class="kd-course-code">{{ course.code }}</span>
+              <span class="kd-badge kd-badge-primary text-uppercase">{{ course.level }}</span>
+            </div>
+            <h3 class="kd-course-title">{{ course.name }}</h3>
+            <p class="kd-course-desc">{{ course.description|truncatewords:20 }}</p>
+            <div class="kd-course-meta">
+              <span><i class="bi bi-calendar3 me-1"></i>{{ course.duration_weeks }} Weeks</span>
+              <span><i class="bi bi-tag me-1"></i>{{ course.category }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- Public Footer -->
+  <footer class="container py-4 border-top mt-5" style="border-color: var(--kd-border) !important;">
+    <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3 text-muted" style="font-size: 0.8125rem;">
+      <div class="d-flex align-items-center gap-2">
+        <div class="kd-brand-logo" style="width: 24px; height: 24px; font-size: 0.75rem;">K</div>
+        <span class="text-light fw-semibold">KDTechX</span>
+        <span class="opacity-50">&mdash; Learn. Practice. Assess. Grow.</span>
+      </div>
+      <div>
+        <span>&copy; {% now "Y" %} KDTechX Portal. Production Grade.</span>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}My Learning Progress | KDTechX{% endblock %}
+{% block page_title %}Learning Progress{% endblock %}
+
+{% block main_content %}
+<div class="mb-4">
+  <h1 class="h4 fw-bold text-light mb-1">My Performance & Progress</h1>
+  <p class="text-muted small mb-0">Track your score velocity and assessment mastery over time.</p>
+</div>
+
+<!-- Progress KPIs -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Average Performance</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ avg_score }}%</div>
+      <div class="kd-stat-footer text-muted">Across all attempts</div>
+    </div>
+  </div>
+  <div class="col-6 col-md-4">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Pass Rate</span>
+      <div class="kd-stat-value fs-4 kd-tnum">{{ pass_rate }}%</div>
+      <div class="kd-stat-footer">
+        <span class="kd-stat-trend {% if pass_rate >= 60 %}up{% else %}down{% endif %}">
+          {{ total_count }} Completed
+        </span>
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-4">
+    <div class="kd-stat-card p-3">
+      <span class="kd-stat-label">Completion Status</span>
+      <div class="kd-stat-value fs-4 kd-tnum">Active</div>
+      <div class="kd-stat-footer text-muted">Curriculum on schedule</div>
+    </div>
+  </div>
+</div>
+
+<!-- Score Progression Chart -->
+<div class="kd-card mb-4">
+  <h2 class="h6 fw-bold text-light mb-3">Score Progression Trend</h2>
+  <div style="height: 280px; position: relative;">
+    <canvas id="studentProgressChart"></canvas>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script id="progress-labels" type="application/json">{{ labels_json|safe }}</script>
+<script id="progress-scores" type="application/json">{{ scores_json|safe }}</script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const ctx = document.getElementById('studentProgressChart');
+  const labelsEl = document.getElementById('progress-labels');
+  const scoresEl = document.getElementById('progress-scores');
+
+  if (ctx && typeof Chart !== 'undefined' && labelsEl && scoresEl) {
+    const labels = JSON.parse(labelsEl.textContent);
+    const scores = JSON.parse(scoresEl.textContent);
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+    const textColor = isDark ? '#aab4c3' : '#64748b';
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Score Percentage (%)',
+          data: scores,
+          borderColor: '#2ddf91',
+          backgroundColor: 'rgba(45, 223, 145, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.3,
+          pointBackgroundColor: '#2ddf91',
+          pointRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
+          y: { min: 0, max: 100, grid: { color: gridColor }, ticks: { color: textColor } }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

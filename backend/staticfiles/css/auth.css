@@ -1,0 +1,77 @@
+/* ==========================================================================
+   KDTechX Authentication (Login Screens, Passwords, Role Gates)
+   ========================================================================== */
+
+.kd-auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--kd-space-6);
+  position: relative;
+  background-color: var(--kd-bg);
+  overflow: hidden;
+}
+
+.kd-auth-card {
+  width: 100%;
+  max-width: 440px;
+  background-color: var(--kd-surface);
+  border: 1px solid var(--kd-border);
+  border-radius: var(--kd-radius-xl);
+  padding: var(--kd-space-8);
+  box-shadow: var(--kd-shadow-lg);
+  position: relative;
+  z-index: 10;
+}
+
+.kd-auth-header {
+  text-align: center;
+  margin-bottom: var(--kd-space-6);
+}
+
+.kd-auth-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-radius: var(--kd-radius-full);
+  margin-bottom: var(--kd-space-3);
+}
+
+.kd-auth-badge.admin {
+  background-color: var(--kd-indigo-tint);
+  color: var(--kd-indigo);
+  border: 1px solid rgba(116, 108, 255, 0.25);
+}
+
+.kd-auth-badge.student {
+  background-color: var(--kd-primary-tint);
+  color: var(--kd-primary);
+  border: 1px solid rgba(79, 140, 255, 0.25);
+}
+
+.kd-auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--kd-text);
+  margin-bottom: var(--kd-space-1);
+  letter-spacing: -0.02em;
+}
+
+.kd-auth-subtitle {
+  font-size: 0.875rem;
+  color: var(--kd-text-muted);
+  margin: 0;
+}
+
+.kd-auth-footer {
+  margin-top: var(--kd-space-6);
+  padding-top: var(--kd-space-4);
+  border-top: 1px solid var(--kd-border);
+  text-align: center;
+  font-size: 0.8125rem;
+  color: var(--kd-text-muted);
+}

@@ -1,0 +1,81 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}Assessment History | KDTechX{% endblock %}
+{% block page_title %}Assessment History{% endblock %}
+
+{% block main_content %}
+<div class="mb-4">
+  <h1 class="h4 fw-bold text-light mb-1">My Assessment History</h1>
+  <p class="text-muted small mb-0">Review all previously submitted tests, scores, and performance feedback.</p>
+</div>
+
+<!-- History Table Card -->
+<div class="kd-table-card">
+  <div class="kd-table-toolbar">
+    <div class="kd-search-wrapper" style="max-width: 320px;">
+      <i class="bi bi-search kd-search-icon"></i>
+      <input type="text" class="kd-input kd-search-input" placeholder="Search past tests..." data-table-search="history-table">
+    </div>
+    <div class="text-muted small">
+      Total Completed: <strong class="text-light">{{ attempts.count }}</strong>
+    </div>
+  </div>
+
+  <div class="kd-table-responsive">
+    <table class="kd-table" id="history-table">
+      <thead>
+        <tr>
+          <th>Assessment Title</th>
+          <th>Course</th>
+          <th>Score</th>
+          <th>Percentage</th>
+          <th>Status</th>
+          <th>Time Taken</th>
+          <th>Date Submitted</th>
+          <th class="text-end">Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in attempts %}
+        <tr>
+          <td>
+            <a href="{% url 'student_portal:result_detail' a.id %}" class="fw-semibold text-light text-decoration-none">
+              {{ a.quiz.title }}
+            </a>
+          </td>
+          <td><span class="kd-course-code">{{ a.quiz.course.code }}</span></td>
+          <td class="kd-tnum fw-bold">{{ a.score }} / {{ a.quiz.total_marks }}</td>
+          <td class="kd-tnum">{{ a.percentage }}%</td>
+          <td>
+            <span class="kd-badge {% if a.is_passed %}kd-badge-success{% else %}kd-badge-danger{% endif %}">
+              {% if a.is_passed %}PASSED{% else %}FAILED{% endif %}
+            </span>
+          </td>
+          <td class="text-muted small kd-tnum">{{ a.time_taken_seconds }}s</td>
+          <td class="text-muted small">{{ a.submitted_at|date:"M d, Y &bull; H:i" }}</td>
+          <td class="text-end">
+            <a href="{% url 'student_portal:result_detail' a.id %}" class="kd-btn kd-btn-outline kd-btn-sm py-1 px-2" title="View Result Review">
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <div class="kd-empty-state">
+              <div class="kd-empty-icon"><i class="bi bi-clock-history"></i></div>
+              <h3 class="kd-empty-title">No History Yet</h3>
+              <p class="kd-empty-desc">You have not submitted any assessments yet. Check your dashboard for active tests.</p>
+              <a href="{% url 'student_portal:dashboard' %}" class="kd-btn kd-btn-primary kd-btn-sm">
+                Go to Dashboard
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

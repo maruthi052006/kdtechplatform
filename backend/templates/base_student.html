@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block app_shell %}
+<div class="kd-app-wrapper">
+  <!-- Desktop Student Sidebar -->
+  {% include 'includes/student_sidebar.html' %}
+
+  <!-- Mobile Offcanvas Sidebar -->
+  <div class="offcanvas offcanvas-start bg-dark border-end" style="border-color: var(--kd-border) !important; width: 280px;" tabindex="-1" id="kdMobileSidebar" aria-labelledby="kdMobileSidebarLabel">
+    <div class="offcanvas-header border-bottom" style="border-color: var(--kd-border) !important; height: var(--kd-topbar-height);">
+      <div class="d-flex align-items-center gap-2">
+        <div class="kd-brand-logo">K</div>
+        <span class="fw-bold text-light">KDTechX</span>
+      </div>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body p-0">
+      {% include 'includes/student_sidebar.html' %}
+    </div>
+  </div>
+
+  <!-- Main Application Wrapper -->
+  <div class="kd-main-wrapper">
+    {% include 'includes/navbar.html' %}
+
+    <main class="kd-content-container">
+      {% block main_content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+  </div>
+</div>
+{% endblock %}

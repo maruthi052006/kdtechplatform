@@ -1,0 +1,188 @@
+/* ==========================================================================
+   KDTechX Layout Architecture (App Shell, Topbar, Sidebar, Content Area)
+   ========================================================================== */
+
+.kd-app-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+  background-color: var(--kd-bg);
+  position: relative;
+}
+
+/* Sidebar Shell */
+.kd-sidebar {
+  width: var(--kd-sidebar-width);
+  min-width: var(--kd-sidebar-width);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background-color: var(--kd-surface);
+  border-right: 1px solid var(--kd-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 1020;
+  transition: width var(--kd-transition-base);
+}
+
+.kd-sidebar-header {
+  height: var(--kd-topbar-height);
+  padding: 0 var(--kd-space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--kd-border);
+}
+
+.kd-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-3);
+  text-decoration: none;
+}
+
+.kd-brand-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--kd-radius-md);
+  background: linear-gradient(135deg, var(--kd-primary) 0%, var(--kd-cyan) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px var(--kd-primary-glow);
+}
+
+.kd-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.kd-brand-name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--kd-text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.kd-brand-tagline {
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--kd-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kd-sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--kd-space-4) var(--kd-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--kd-space-4);
+}
+
+.kd-sidebar-footer {
+  padding: var(--kd-space-3) var(--kd-space-4);
+  border-top: 1px solid var(--kd-border);
+  background-color: var(--kd-surface-2);
+}
+
+/* Main Workspace */
+.kd-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background-color: var(--kd-bg);
+}
+
+/* Sticky Topbar */
+.kd-topbar {
+  height: var(--kd-topbar-height);
+  position: sticky;
+  top: 0;
+  background-color: rgba(12, 17, 24, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--kd-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--kd-space-6);
+  z-index: 1010;
+}
+
+[data-theme="light"] .kd-topbar {
+  background-color: rgba(255, 255, 255, 0.88);
+}
+
+.kd-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-4);
+}
+
+.kd-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--kd-space-3);
+}
+
+/* Page Content Container */
+.kd-content-container {
+  flex: 1;
+  padding: var(--kd-space-6);
+  max-width: 1480px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* Exam / Distraction-Free Fullscreen Layout */
+.kd-exam-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--kd-bg);
+  position: relative;
+  user-select: none;
+}
+
+.kd-exam-header {
+  height: 60px;
+  padding: 0 var(--kd-space-6);
+  border-bottom: 1px solid var(--kd-border);
+  background-color: var(--kd-surface);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
+.kd-exam-body {
+  flex: 1;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--kd-space-6);
+}
+
+/* Responsive Overrides */
+@media (max-width: 991.98px) {
+  .kd-sidebar {
+    display: none; /* Controlled via Bootstrap Offcanvas on mobile */
+  }
+
+  .kd-topbar {
+    padding: 0 var(--kd-space-4);
+  }
+
+  .kd-content-container {
+    padding: var(--kd-space-4);
+  }
+}

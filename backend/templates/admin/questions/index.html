@@ -1,0 +1,280 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}Question Bank | KDTechX{% endblock %}
+{% block page_title %}Question Bank{% endblock %}
+
+{% block main_content %}
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <h1 class="h4 fw-bold text-light mb-1">Central Question Repository</h1>
+    <p class="text-muted small mb-0">Manage reusable question items, options, difficulty ratings, and explanations.</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <a href="{% url 'admin_portal:questions_import' %}" class="kd-btn kd-btn-secondary kd-btn-sm">
+      <i class="bi bi-file-earmark-excel"></i> Excel Batch Import
+    </a>
+    <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createQuestionModal">
+      <i class="bi bi-plus-circle"></i> Add Question
+    </button>
+  </div>
+</div>
+
+<!-- Question Filters & Table Card -->
+<div class="kd-table-card">
+  <div class="kd-table-toolbar">
+    <div class="d-flex align-items-center gap-2 flex-grow-1" style="max-width: 600px;">
+      <div class="kd-search-wrapper flex-grow-1">
+        <i class="bi bi-search kd-search-icon"></i>
+        <input type="text" class="kd-input kd-search-input" placeholder="Search questions..." data-table-search="questions-table">
+      </div>
+
+      <form method="get" class="d-flex align-items-center gap-2 m-0">
+        <select name="course" class="kd-select py-1 px-2" style="font-size: 0.8125rem;" onchange="this.form.submit()">
+          <option value="">All Courses</option>
+          {% for c in courses %}
+            <option value="{{ c.id }}" {% if selected_course == c.id|stringformat:"s" %}selected{% endif %}>{{ c.code }}</option>
+          {% endfor %}
+        </select>
+
+        <select name="difficulty" class="kd-select py-1 px-2" style="font-size: 0.8125rem;" onchange="this.form.submit()">
+          <option value="">All Difficulties</option>
+          <option value="easy" {% if selected_difficulty == 'easy' %}selected{% endif %}>Easy</option>
+          <option value="medium" {% if selected_difficulty == 'medium' %}selected{% endif %}>Medium</option>
+          <option value="hard" {% if selected_difficulty == 'hard' %}selected{% endif %}>Hard</option>
+        </select>
+      </form>
+    </div>
+
+    <div class="text-muted small">
+      Questions: <strong class="text-light">{{ questions.count }}</strong>
+    </div>
+  </div>
+
+  <div class="kd-table-responsive">
+    <table class="kd-table" id="questions-table">
+      <thead>
+        <tr>
+          <th>Course</th>
+          <th>Question Prompt</th>
+          <th>Topic</th>
+          <th>Answer</th>
+          <th>Difficulty</th>
+          <th>Marks</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for q in questions %}
+        <tr>
+          <td><span class="kd-course-code">{{ q.course.code }}</span></td>
+          <td style="max-width: 440px;">
+            <div class="fw-medium text-light text-truncate" title="{{ q.question_text }}">{{ q.question_text }}</div>
+            <div class="text-muted fs-xs text-truncate">
+              A: {{ q.option_a|truncatewords:4 }} | B: {{ q.option_b|truncatewords:4 }}
+            </div>
+          </td>
+          <td>
+            <span class="text-muted small">
+              {{ q.topic.title|default:q.topic_name|default:"General" }}
+            </span>
+          </td>
+          <td>
+            <span class="kd-badge kd-badge-success py-1 px-2 font-monospace fw-bold">
+              {{ q.correct_answer }}
+            </span>
+          </td>
+          <td>
+            <span class="kd-badge {% if q.difficulty == 'easy' %}kd-badge-success{% elif q.difficulty == 'hard' %}kd-badge-danger{% else %}kd-badge-warning{% endif %}">
+              {{ q.get_difficulty_display }}
+            </span>
+          </td>
+          <td class="kd-tnum fw-semibold text-secondary">{{ q.marks }}</td>
+          <td class="text-end">
+            <button type="button" class="kd-btn kd-btn-outline kd-btn-sm py-1 px-2" data-bs-toggle="modal" data-bs-target="#previewModal{{ q.id }}" title="Preview Question">
+              <i class="bi bi-eye"></i>
+            </button>
+            <form method="post" action="{% url 'admin_portal:question_delete' q.id %}" class="d-inline" onsubmit="return confirm('Delete this question from question bank?');">
+              {% csrf_token %}
+              <button type="submit" class="kd-btn kd-btn-danger kd-btn-sm py-1 px-2" title="Delete question">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+
+        <!-- Question Preview Modal -->
+        <div class="modal fade" id="previewModal{{ q.id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+              <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+                <div>
+                  <span class="kd-course-code me-2">{{ q.course.code }}</span>
+                  <span class="kd-badge kd-badge-neutral">{{ q.get_difficulty_display }}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body p-4">
+                <h4 class="h5 fw-semibold text-light mb-4">{{ q.question_text }}</h4>
+                <div class="d-flex flex-column gap-2 mb-4">
+                  <div class="p-3 rounded border {% if q.correct_answer == 'A' %}border-success bg-surface-2 text-success{% else %}bg-surface-3 text-secondary{% endif %}">
+                    <strong>A.</strong> {{ q.option_a }}
+                  </div>
+                  <div class="p-3 rounded border {% if q.correct_answer == 'B' %}border-success bg-surface-2 text-success{% else %}bg-surface-3 text-secondary{% endif %}">
+                    <strong>B.</strong> {{ q.option_b }}
+                  </div>
+                  <div class="p-3 rounded border {% if q.correct_answer == 'C' %}border-success bg-surface-2 text-success{% else %}bg-surface-3 text-secondary{% endif %}">
+                    <strong>C.</strong> {{ q.option_c }}
+                  </div>
+                  <div class="p-3 rounded border {% if q.correct_answer == 'D' %}border-success bg-surface-2 text-success{% else %}bg-surface-3 text-secondary{% endif %}">
+                    <strong>D.</strong> {{ q.option_d }}
+                  </div>
+                </div>
+                {% if q.explanation %}
+                <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+                  <span class="text-primary fw-semibold small d-block mb-1"><i class="bi bi-lightbulb me-1"></i>Explanation:</span>
+                  <p class="text-muted small mb-0">{{ q.explanation }}</p>
+                </div>
+                {% endif %}
+              </div>
+              <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+                <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <div class="kd-empty-state">
+              <div class="kd-empty-icon"><i class="bi bi-database"></i></div>
+              <h3 class="kd-empty-title">Question Bank is Empty</h3>
+              <p class="kd-empty-desc">Add questions manually or upload an Excel spreadsheet to bulk-populate.</p>
+              <div class="d-flex gap-2 justify-content-center">
+                <a href="{% url 'admin_portal:questions_import' %}" class="kd-btn kd-btn-secondary kd-btn-sm">
+                  Excel Batch Import
+                </a>
+                <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#createQuestionModal">
+                  Add Single Question
+                </button>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Question Modal -->
+<div class="modal fade" id="createQuestionModal" tabindex="-1" aria-labelledby="createQuestionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6" id="createQuestionModalLabel">Add Question Item</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:questions' %}">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="q_course" class="kd-label kd-label-required">Target Course</label>
+                <select id="q_course" name="course_id" class="kd-select" required>
+                  <option value="">-- Select Course --</option>
+                  {% for c in courses %}
+                    <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="q_topic" class="kd-label">Topic Association (Optional)</label>
+                <select id="q_topic" name="topic_id" class="kd-select">
+                  <option value="">-- General / Untagged --</option>
+                  {% for t in topics %}
+                    <option value="{{ t.id }}">{{ t.week.course.code }} - {{ t.title }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="kd-form-group">
+                <label for="q_text" class="kd-label kd-label-required">Question Prompt</label>
+                <textarea id="q_text" name="question_text" class="kd-textarea" placeholder="Type the question statement..." required></textarea>
+              </div>
+            </div>
+
+            <!-- Options A, B, C, D -->
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="opt_a" class="kd-label kd-label-required">Option A</label>
+                <input type="text" id="opt_a" name="option_a" class="kd-input" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="opt_b" class="kd-label kd-label-required">Option B</label>
+                <input type="text" id="opt_b" name="option_b" class="kd-input" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="opt_c" class="kd-label kd-label-required">Option C</label>
+                <input type="text" id="opt_c" name="option_c" class="kd-input" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="kd-form-group">
+                <label for="opt_d" class="kd-label kd-label-required">Option D</label>
+                <input type="text" id="opt_d" name="option_d" class="kd-input" required>
+              </div>
+            </div>
+
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="correct_ans" class="kd-label kd-label-required">Correct Answer</label>
+                <select id="correct_ans" name="correct_answer" class="kd-select" required>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="diff_select" class="kd-label">Difficulty</label>
+                <select id="diff_select" name="difficulty" class="kd-select">
+                  <option value="easy">Easy</option>
+                  <option value="medium" selected>Medium</option>
+                  <option value="hard">Hard</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="kd-form-group">
+                <label for="marks_input" class="kd-label">Marks</label>
+                <input type="number" id="marks_input" name="marks" class="kd-input" value="1.00" step="0.25" min="0.25">
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="kd-form-group">
+                <label for="exp_text" class="kd-label">Explanation (Visible after submission)</label>
+                <textarea id="exp_text" name="explanation" class="kd-textarea" placeholder="Explain why the correct answer is valid..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Save to Bank</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

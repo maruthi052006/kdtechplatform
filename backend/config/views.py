@@ -29,8 +29,29 @@ class HealthCheckView(APIView):
             {
                 "status": "ok" if db_status == "ok" else "degraded",
                 "database": db_status,
-                "version": "1.0.0",
+                "version": "2.0.0",
                 "timestamp": timezone.now().isoformat(),
             },
             status=status_code,
         )
+
+def landing_page_view(request):
+    """
+    Renders the public landing page with active published courses.
+    """
+    from django.shortcuts import render
+    from apps.courses.models import Course
+    courses = Course.objects.filter(status='published')[:6]
+    return render(request, 'public/index.html', {'courses': courses})
+
+def error_403_view(request, exception=None):
+    from django.shortcuts import render
+    return render(request, 'errors/403.html', status=403)
+
+def error_404_view(request, exception=None):
+    from django.shortcuts import render
+    return render(request, 'errors/404.html', status=404)
+
+def error_500_view(request):
+    from django.shortcuts import render
+    return render(request, 'errors/500.html', status=500)

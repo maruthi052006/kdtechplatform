@@ -1,0 +1,62 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}My Profile | KDTechX{% endblock %}
+{% block page_title %}Student Profile{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center gap-4 mb-4 pb-4 border-bottom" style="border-color: var(--kd-border) !important;">
+        <div class="kd-avatar" style="width: 64px; height: 64px; font-size: 1.5rem;">
+          {{ user.first_name|default:user.username|make_list|first|upper }}
+        </div>
+        <div>
+          <h1 class="h4 fw-bold text-light mb-1">{{ user.get_full_name|default:user.username }}</h1>
+          <div class="d-flex align-items-center gap-2">
+            <span class="kd-badge kd-badge-primary font-monospace">{{ profile.student_id }}</span>
+            {% if profile.batch %}
+              <span class="kd-badge kd-badge-neutral">{{ profile.batch.name }}</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Student / Candidate ID</div>
+            <div class="fw-bold text-light font-monospace">{{ profile.student_id }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Assigned Batch</div>
+            <div class="fw-bold text-light">{{ profile.batch.name|default:"Unassigned" }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Portal Username</div>
+            <div class="fw-bold text-light font-monospace">{{ user.username }}</div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Email Address</div>
+            <div class="fw-bold text-light text-truncate">{{ user.email }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex align-items-center justify-content-between pt-3 border-top" style="border-color: var(--kd-border) !important;">
+        <span class="text-muted small">Account created {{ user.date_joined|date:"M d, Y" }}</span>
+        <a href="{% url 'accounts:change_password' %}" class="kd-btn kd-btn-outline kd-btn-sm">
+          <i class="bi bi-key"></i> Update Password
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

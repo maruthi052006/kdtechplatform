@@ -1,0 +1,70 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}System Settings | KDTechX{% endblock %}
+{% block page_title %}Settings{% endblock %}
+
+{% block main_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="mb-4">
+      <h1 class="h4 fw-bold text-light mb-1">Platform Architecture & Settings</h1>
+      <p class="text-muted small mb-0">Runtime environment parameters and administrative configurations.</p>
+    </div>
+
+    <!-- Runtime Environment Card -->
+    <div class="kd-card mb-4">
+      <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom" style="border-color: var(--kd-border) !important;">
+        <div class="kd-stat-icon"><i class="bi bi-cpu"></i></div>
+        <div>
+          <h2 class="h6 fw-bold text-light mb-0">Runtime Environment</h2>
+          <p class="text-muted small mb-0">Production system configuration details</p>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Django Framework</div>
+            <div class="fw-bold text-light font-monospace">{{ system_info.django_version }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Python Runtime</div>
+            <div class="fw-bold text-light font-monospace">{{ system_info.python_version }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">Database Engine</div>
+            <div class="fw-bold text-light font-monospace text-truncate">{{ system_info.default_database }}</div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="p-3 rounded bg-surface-2 border" style="border-color: var(--kd-border) !important;">
+            <div class="text-muted fs-xs text-uppercase fw-semibold mb-1">System Timezone</div>
+            <div class="fw-bold text-light font-monospace">{{ system_info.timezone }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Admin Actions -->
+    <div class="kd-card">
+      <h2 class="h6 fw-bold text-light mb-3">Administrative Tooling</h2>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'accounts:change_password' %}" class="kd-btn kd-btn-outline kd-btn-sm">
+          <i class="bi bi-key"></i> Update Password
+        </a>
+        <a href="{% url 'swagger-ui' %}" target="_blank" class="kd-btn kd-btn-outline kd-btn-sm">
+          <i class="bi bi-code-slash"></i> Interactive Swagger OpenAPI
+        </a>
+        <a href="{% url 'admin:index' %}" target="_blank" class="kd-btn kd-btn-secondary kd-btn-sm">
+          <i class="bi bi-lock"></i> Django Built-in Admin
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

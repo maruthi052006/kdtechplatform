@@ -1,0 +1,166 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+
+{% block title %}{{ course.name }} - Curriculum | KDTechX{% endblock %}
+{% block page_title %}Curriculum Builder{% endblock %}
+
+{% block main_content %}
+<!-- Course Breadcrumb & Navigation Header -->
+<div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 mb-4">
+  <div>
+    <div class="d-flex align-items-center gap-2 mb-1">
+      <a href="{% url 'admin_portal:courses' %}" class="text-muted text-decoration-none small">&larr; Back to Courses</a>
+      <span class="text-muted small">&bull;</span>
+      <span class="kd-course-code">{{ course.code }}</span>
+    </div>
+    <h1 class="h4 fw-bold text-light mb-0">{{ course.name }}</h1>
+    <p class="text-muted small mb-0">{{ course.category }} &bull; {{ course.duration_weeks }} Weeks Planned</p>
+  </div>
+  <div class="d-flex align-items-center gap-2">
+    <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#addWeekModal">
+      <i class="bi bi-calendar-plus"></i> Add Week {{ next_week }}
+    </button>
+  </div>
+</div>
+
+<!-- Curriculum Timeline -->
+<div class="kd-curriculum-timeline">
+  {% for week in weeks %}
+  <div class="kd-week-block">
+    <div class="kd-week-marker"></div>
+    <div class="kd-week-header">
+      <div>
+        <span class="kd-week-badge">Week {{ week.week_number|stringformat:"02d" }}</span>
+        <h2 class="h5 fw-bold text-light mb-1 mt-1">{{ week.title }}</h2>
+        {% if week.description %}
+          <p class="text-muted small mb-0">{{ week.description }}</p>
+        {% endif %}
+      </div>
+      <div>
+        <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-toggle="modal" data-bs-target="#addTopicModal{{ week.id }}">
+          <i class="bi bi-plus-circle"></i> Add Topic
+        </button>
+      </div>
+    </div>
+
+    <!-- Topics List -->
+    <div class="kd-topic-list">
+      {% for topic in week.topics.all %}
+      <div class="kd-topic-item justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <span class="kd-topic-num">{{ forloop.counter|stringformat:"02d" }}</span>
+          <div>
+            <span class="fw-medium text-light">{{ topic.title }}</span>
+            {% if topic.summary %}
+              <div class="text-muted fs-xs">{{ topic.summary }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="text-muted fs-xs py-2 px-3 rounded bg-surface-3">
+        <i class="bi bi-info-circle me-1"></i> No topics added yet for Week {{ week.week_number }}.
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Scheduled Quizzes for this week -->
+    {% if week.quizzes.all %}
+    <div class="mt-3 pt-3 border-top" style="border-color: var(--kd-border) !important;">
+      <span class="text-muted fs-xs text-uppercase fw-bold letter-spacing-1 d-block mb-2">Weekly Assessments</span>
+      <div class="d-flex flex-wrap gap-2">
+        {% for q in week.quizzes.all %}
+        <a href="{% url 'admin_portal:quiz_detail' q.id %}" class="kd-badge kd-badge-primary py-2 px-3 text-decoration-none d-inline-flex align-items-center gap-2">
+          <i class="bi bi-ui-checks"></i>
+          <span>{{ q.title }} ({{ q.duration_minutes }}m)</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Add Topic Modal for this Week -->
+  <div class="modal fade" id="addTopicModal{{ week.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+        <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+          <h5 class="modal-title text-light fw-bold fs-6">Add Topic to Week {{ week.week_number }}</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form method="post" action="{% url 'admin_portal:course_curriculum' course.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="add_topic">
+          <input type="hidden" name="week_id" value="{{ week.id }}">
+          <div class="modal-body">
+            <div class="kd-form-group">
+              <label for="topic_title_{{ week.id }}" class="kd-label kd-label-required">Topic Title</label>
+              <input type="text" id="topic_title_{{ week.id }}" name="title" class="kd-input" placeholder="e.g. Asynchronous I/O & Coroutines" required>
+            </div>
+            <div class="kd-form-group">
+              <label for="topic_summary_{{ week.id }}" class="kd-label">Topic Summary (Optional)</label>
+              <textarea id="topic_summary_{{ week.id }}" name="summary" class="kd-textarea" placeholder="Key concepts covered in this topic..."></textarea>
+            </div>
+          </div>
+          <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+            <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Add Topic</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="kd-empty-state">
+    <div class="kd-empty-icon"><i class="bi bi-diagram-3"></i></div>
+    <h3 class="kd-empty-title">Curriculum Empty</h3>
+    <p class="kd-empty-desc">Create the first week syllabus to start building the course timeline.</p>
+    <button type="button" class="kd-btn kd-btn-primary kd-btn-sm" data-bs-toggle="modal" data-bs-target="#addWeekModal">
+      Add Week 1
+    </button>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Add Week Modal -->
+<div class="modal fade" id="addWeekModal" tabindex="-1" aria-labelledby="addWeekModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content kd-surface border" style="border-color: var(--kd-border-strong);">
+      <div class="modal-header border-bottom" style="border-color: var(--kd-border) !important;">
+        <h5 class="modal-title text-light fw-bold fs-6" id="addWeekModalLabel">Add Curriculum Week</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" action="{% url 'admin_portal:course_curriculum' course.id %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="add_week">
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-4">
+              <div class="kd-form-group">
+                <label for="w_num" class="kd-label kd-label-required">Week #</label>
+                <input type="number" id="w_num" name="week_number" class="kd-input" value="{{ next_week }}" min="1" max="52" required>
+              </div>
+            </div>
+            <div class="col-8">
+              <div class="kd-form-group">
+                <label for="w_title" class="kd-label kd-label-required">Week Theme / Title</label>
+                <input type="text" id="w_title" name="title" class="kd-input" placeholder="e.g. Object-Oriented Design Patterns" required>
+              </div>
+            </div>
+            <div class="col-12">
+              <div class="kd-form-group">
+                <label for="w_desc" class="kd-label">Module Overview (Optional)</label>
+                <textarea id="w_desc" name="description" class="kd-textarea" placeholder="Brief outline of competencies taught this week..."></textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top" style="border-color: var(--kd-border) !important;">
+          <button type="button" class="kd-btn kd-btn-outline kd-btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="kd-btn kd-btn-primary kd-btn-sm">Add Week</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

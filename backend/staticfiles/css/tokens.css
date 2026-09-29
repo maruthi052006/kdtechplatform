@@ -1,0 +1,159 @@
+/* ==========================================================================
+   KDTechX Design System - Design Tokens
+   Brand Identity: Technical, Intelligent, Modern, Precise, Premium
+   Palette: 80% Neutral, 15% Secondary, 5% Accent
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+:root, [data-theme="dark"] {
+  /* Surface Layers */
+  --kd-bg: #070a0f;
+  --kd-surface: #0c1118;
+  --kd-surface-2: #111823;
+  --kd-surface-3: #16202e;
+  --kd-surface-hover: #1c2738;
+  --kd-surface-active: #223044;
+
+  /* Borders & Dividers */
+  --kd-border: rgba(255, 255, 255, 0.08);
+  --kd-border-strong: rgba(255, 255, 255, 0.15);
+  --kd-border-focus: rgba(79, 140, 255, 0.55);
+
+  /* Typography */
+  --kd-text: #f7f9fc;
+  --kd-text-secondary: #aab4c3;
+  --kd-text-muted: #6f7b8c;
+  --kd-text-disabled: #414b5c;
+
+  /* Brand Accents */
+  --kd-primary: #4f8cff;
+  --kd-primary-hover: #6a9cff;
+  --kd-primary-active: #3b74db;
+  --kd-primary-tint: rgba(79, 140, 255, 0.12);
+  --kd-primary-glow: rgba(79, 140, 255, 0.25);
+
+  --kd-cyan: #2bd8ff;
+  --kd-cyan-tint: rgba(43, 216, 255, 0.12);
+  --kd-indigo: #746cff;
+  --kd-indigo-tint: rgba(116, 108, 255, 0.12);
+
+  /* Semantic Feedback */
+  --kd-success: #2ddf91;
+  --kd-success-tint: rgba(45, 223, 145, 0.12);
+  --kd-warning: #f4b740;
+  --kd-warning-tint: rgba(244, 183, 64, 0.12);
+  --kd-danger: #ff5f6d;
+  --kd-danger-tint: rgba(255, 95, 109, 0.12);
+
+  /* Shadows */
+  --kd-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --kd-shadow-md: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --kd-shadow-lg: 0 12px 36px rgba(0, 0, 0, 0.65);
+  --kd-shadow-card: 0 0 0 1px var(--kd-border), 0 4px 16px rgba(0, 0, 0, 0.35);
+
+  /* Grid & Atmospherics */
+  --kd-grid-color: rgba(255, 255, 255, 0.035);
+  --kd-glow-color: rgba(79, 140, 255, 0.08);
+
+  /* Component specific overrides */
+  --bs-body-bg: var(--kd-bg);
+  --bs-body-color: var(--kd-text);
+  --bs-border-color: var(--kd-border);
+}
+
+[data-theme="light"] {
+  /* Surface Layers */
+  --kd-bg: #f8fafc;
+  --kd-surface: #ffffff;
+  --kd-surface-2: #f1f5f9;
+  --kd-surface-3: #e2e8f0;
+  --kd-surface-hover: #f8fafc;
+  --kd-surface-active: #edf2f7;
+
+  /* Borders & Dividers */
+  --kd-border: rgba(0, 0, 0, 0.08);
+  --kd-border-strong: rgba(0, 0, 0, 0.16);
+  --kd-border-focus: rgba(37, 99, 235, 0.45);
+
+  /* Typography */
+  --kd-text: #0f172a;
+  --kd-text-secondary: #475569;
+  --kd-text-muted: #64748b;
+  --kd-text-disabled: #94a3b8;
+
+  /* Brand Accents */
+  --kd-primary: #2563eb;
+  --kd-primary-hover: #1d4ed8;
+  --kd-primary-active: #1e40af;
+  --kd-primary-tint: rgba(37, 99, 235, 0.08);
+  --kd-primary-glow: rgba(37, 99, 235, 0.15);
+
+  --kd-cyan: #0284c7;
+  --kd-cyan-tint: rgba(2, 132, 199, 0.08);
+  --kd-indigo: #4f46e5;
+  --kd-indigo-tint: rgba(79, 70, 229, 0.08);
+
+  /* Semantic Feedback */
+  --kd-success: #16a34a;
+  --kd-success-tint: rgba(22, 163, 74, 0.08);
+  --kd-warning: #d97706;
+  --kd-warning-tint: rgba(217, 119, 6, 0.08);
+  --kd-danger: #dc2626;
+  --kd-danger-tint: rgba(220, 38, 38, 0.08);
+
+  /* Shadows */
+  --kd-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --kd-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  --kd-shadow-lg: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  --kd-shadow-card: 0 0 0 1px var(--kd-border), 0 2px 8px rgba(0, 0, 0, 0.04);
+
+  /* Grid & Atmospherics */
+  --kd-grid-color: rgba(0, 0, 0, 0.035);
+  --kd-glow-color: rgba(37, 99, 235, 0.06);
+
+  /* Component specific overrides */
+  --bs-body-bg: var(--kd-bg);
+  --bs-body-color: var(--kd-text);
+  --bs-border-color: var(--kd-border);
+}
+
+/* ==========================================================================
+   Global Layout & Metrics Scale
+   ========================================================================== */
+:root {
+  /* Typography Scale */
+  --kd-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --kd-font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* Spacing Scale (4, 8, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 128) */
+  --kd-space-1: 4px;
+  --kd-space-2: 8px;
+  --kd-space-3: 12px;
+  --kd-space-4: 16px;
+  --kd-space-5: 20px;
+  --kd-space-6: 24px;
+  --kd-space-8: 32px;
+  --kd-space-10: 40px;
+  --kd-space-12: 48px;
+  --kd-space-16: 64px;
+  --kd-space-20: 80px;
+  --kd-space-24: 96px;
+
+  /* Border Radii (6, 10, 14, 18, 24) */
+  --kd-radius-sm: 6px;
+  --kd-radius-md: 10px;
+  --kd-radius-lg: 14px;
+  --kd-radius-xl: 18px;
+  --kd-radius-2xl: 24px;
+  --kd-radius-full: 9999px;
+
+  /* Transitions */
+  --kd-transition-fast: 120ms cubic-bezier(0.16, 1, 0.3, 1);
+  --kd-transition-base: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+  --kd-transition-slow: 240ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Layout dimensions */
+  --kd-sidebar-width: 270px;
+  --kd-topbar-height: 64px;
+}

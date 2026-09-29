@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block title %}500 Internal Error | KDTechX{% endblock %}
+
+{% block content %}
+<div class="kd-auth-wrapper kd-bg-grid">
+  <div class="kd-glow-radial"></div>
+  <div class="kd-auth-card text-center">
+    <div class="kd-empty-icon mx-auto text-danger mb-3">
+      <i class="bi bi-exclamation-triangle"></i>
+    </div>
+    <div class="display-4 fw-bold text-muted mb-2">500</div>
+    <h2 class="kd-auth-title">System Error</h2>
+    <p class="kd-auth-subtitle mb-4">Something went wrong on our end. The event has been logged for review.</p>
+    <div class="d-flex justify-content-center gap-2">
+      <a href="javascript:location.reload()" class="kd-btn kd-btn-secondary">Retry</a>
+      <a href="/" class="kd-btn kd-btn-primary">Return Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

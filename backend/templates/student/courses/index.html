@@ -1,0 +1,45 @@
+{% extends 'base_student.html' %}
+{% load static %}
+
+{% block title %}My Courses | KDTechX{% endblock %}
+{% block page_title %}Enrolled Courses{% endblock %}
+
+{% block main_content %}
+<div class="mb-4">
+  <h1 class="h4 fw-bold text-light mb-1">My Enrolled Courses</h1>
+  <p class="text-muted small mb-0">Browse through your technical tracks, curriculum outlines, and assessment modules.</p>
+</div>
+
+<div class="row g-4">
+  {% for en in enrollments %}
+  <div class="col-md-6 col-lg-4">
+    <div class="kd-card h-100 d-flex flex-column kd-card-hover">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <span class="kd-course-code">{{ en.course.code }}</span>
+        <span class="kd-badge kd-badge-primary">{{ en.course.level }}</span>
+      </div>
+
+      <h2 class="h5 fw-bold text-light mb-2">{{ en.course.name }}</h2>
+      <p class="text-muted small mb-4 flex-grow-1">{{ en.course.description|truncatewords:22 }}</p>
+
+      <div class="d-flex align-items-center gap-3 text-muted fs-xs mb-3 pb-3 border-bottom" style="border-color: var(--kd-border) !important;">
+        <span><i class="bi bi-clock me-1"></i>{{ en.course.duration_weeks }} Weeks</span>
+        <span><i class="bi bi-ui-checks me-1"></i>{{ en.quiz_count }} Quizzes</span>
+      </div>
+
+      <a href="{% url 'student_portal:course_detail' en.course.id %}" class="kd-btn kd-btn-primary kd-btn-sm w-100">
+        <i class="bi bi-diagram-3"></i> View Curriculum & Tests
+      </a>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-12">
+    <div class="kd-empty-state">
+      <div class="kd-empty-icon"><i class="bi bi-book"></i></div>
+      <h3 class="kd-empty-title">No Enrolled Courses</h3>
+      <p class="kd-empty-desc">You are not currently assigned to any active engineering courses.</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
